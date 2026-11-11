@@ -1,0 +1,340 @@
+/* Plugin styles; use Obsidian CSS variables only. */
+
+.moc-tree-modal-error {
+	color: var(--text-error);
+	font-size: var(--font-ui-small);
+	padding-top: var(--size-4-2);
+}
+
+/* ---------------------------------------------------------------- structure sidebar */
+
+.moc-tree-view {
+	--moc-tree-font: var(--font-ui-small);
+	--moc-tree-icon: var(--icon-s);
+	--moc-tree-row-pad: var(--size-4-1);
+	--moc-tree-indent: calc(var(--moc-tree-icon) + var(--size-4-1));
+	padding: var(--size-4-2) var(--size-4-2) var(--size-4-8);
+	font-size: var(--moc-tree-font);
+}
+
+.moc-tree-view.mod-size-compact {
+	--moc-tree-font: var(--font-ui-smaller);
+	--moc-tree-icon: var(--icon-xs);
+	--moc-tree-row-pad: 1px;
+}
+
+.moc-tree-view.mod-size-large {
+	--moc-tree-font: var(--font-ui-medium);
+	--moc-tree-icon: var(--icon-m);
+	--moc-tree-row-pad: var(--size-4-2);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-row,
+.moc-tree-view .tree-item-self.moc-tree-section {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	padding: var(--moc-tree-row-pad) var(--size-4-2);
+	margin-bottom: 1px;
+	font-size: var(--moc-tree-font);
+	border-radius: var(--radius-s);
+	transition: background-color 80ms ease-in-out;
+}
+
+.moc-tree-view .tree-item-inner {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.moc-tree-row-icon {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: var(--moc-tree-icon);
+	height: var(--moc-tree-icon);
+	color: var(--text-faint);
+	--icon-size: var(--moc-tree-icon);
+}
+
+.moc-tree-moc .moc-tree-row-icon,
+.moc-tree-cycle .moc-tree-row-icon {
+	color: var(--text-muted);
+}
+
+.moc-tree-moc .tree-item-inner {
+	color: var(--text-normal);
+	font-weight: var(--font-medium);
+}
+
+/* Notes slightly muted, so folders carry the structure. */
+.moc-tree-note .tree-item-inner {
+	color: var(--text-muted);
+}
+
+.moc-tree-count {
+	flex: 0 0 auto;
+	min-width: 1.5em;
+	padding: 0 var(--size-2-2);
+	border-radius: var(--radius-l);
+	background-color: var(--background-modifier-hover);
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	text-align: center;
+}
+
+/*
+ * Every open folder (its header row and children) is one opaque neutral surface; the levels
+ * get lighter towards the inside. Surfaces span the full width (rows are indented by depth)
+ * and sit flush inside each other; only the outermost one is rounded and clips the rest.
+ */
+.moc-tree-view .tree-item-children {
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background-color: transparent;
+}
+
+.moc-tree-view .moc-tree-block {
+	--moc-tree-surface-mix: 1.5%;
+	background-color: color-mix(in srgb, var(--text-normal) var(--moc-tree-surface-mix), var(--background-secondary));
+}
+
+.moc-tree-view .moc-tree-block[data-level="1"] {
+	--moc-tree-surface-mix: 9%;
+	margin-bottom: var(--size-2-2);
+	border-radius: var(--radius-m);
+	overflow: hidden;
+}
+
+.moc-tree-view .moc-tree-block[data-level="2"] {
+	--moc-tree-surface-mix: 6%;
+}
+
+.moc-tree-view .moc-tree-block[data-level="3"] {
+	--moc-tree-surface-mix: 4%;
+}
+
+.moc-tree-view .moc-tree-block[data-level="4"] {
+	--moc-tree-surface-mix: 2.5%;
+}
+
+.moc-tree-view .moc-tree-row[data-depth="1"] {
+	padding-inline-start: calc(var(--size-4-2) + 1 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="2"] {
+	padding-inline-start: calc(var(--size-4-2) + 2 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="3"] {
+	padding-inline-start: calc(var(--size-4-2) + 3 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="4"] {
+	padding-inline-start: calc(var(--size-4-2) + 4 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="5"] {
+	padding-inline-start: calc(var(--size-4-2) + 5 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="6"] {
+	padding-inline-start: calc(var(--size-4-2) + 6 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="7"] {
+	padding-inline-start: calc(var(--size-4-2) + 7 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="8"] {
+	padding-inline-start: calc(var(--size-4-2) + 8 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="9"] {
+	padding-inline-start: calc(var(--size-4-2) + 9 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="10"] {
+	padding-inline-start: calc(var(--size-4-2) + 10 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="11"] {
+	padding-inline-start: calc(var(--size-4-2) + 11 * var(--moc-tree-indent));
+}
+
+.moc-tree-view .moc-tree-row[data-depth="12"] {
+	padding-inline-start: calc(var(--size-4-2) + 12 * var(--moc-tree-indent));
+}
+
+
+.moc-tree-orphans {
+	margin-top: var(--size-4-6);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-section {
+	color: var(--text-muted);
+	font-weight: var(--font-semibold);
+	letter-spacing: 0.02em;
+}
+
+.moc-tree-view .tree-item-self.moc-tree-section.is-collapsed {
+	color: var(--text-faint);
+}
+
+.moc-tree-orphans > .tree-item-children {
+	margin: 0;
+	padding: 0;
+	background-color: transparent;
+}
+
+.moc-tree-dead .tree-item-inner {
+	color: var(--text-faint);
+	text-decoration: line-through;
+}
+
+.moc-tree-cycle .tree-item-inner {
+	color: var(--text-muted);
+	font-style: italic;
+}
+
+.moc-tree-markers {
+	display: flex;
+	gap: var(--size-4-1);
+	color: var(--text-faint);
+}
+
+.moc-tree-marker {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	font-size: var(--font-ui-smaller);
+	cursor: pointer;
+}
+
+.moc-tree-marker-icon {
+	display: inline-flex;
+	--icon-size: var(--icon-xs);
+}
+
+.moc-tree-title-link {
+	color: var(--link-color);
+	text-decoration: var(--link-decoration);
+	cursor: var(--cursor-link);
+}
+
+.moc-tree-title-link:hover {
+	color: var(--link-color-hover);
+	text-decoration: var(--link-decoration-hover);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-drop-into {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-drop-before {
+	box-shadow: inset 0 2px 0 var(--interactive-accent);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-drop-after {
+	box-shadow: inset 0 -2px 0 var(--interactive-accent);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-drop-invalid {
+	background-color: var(--background-modifier-error);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-drop-copy {
+	outline: 2px dashed var(--interactive-accent);
+	outline-offset: -2px;
+}
+
+/* Copy into a folder: light background so the dashed accent outline stays visible. */
+.moc-tree-view .tree-item-self.moc-tree-drop-into.moc-tree-drop-copy {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.moc-tree-check-cycles {
+	color: var(--text-warning);
+}
+
+/* ---------------------------------------------------------------- search, active and revealed rows */
+
+.moc-tree-header {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	padding-bottom: var(--size-4-2);
+	background-color: var(--background-secondary);
+}
+
+.moc-tree-header .search-input-container {
+	width: 100%;
+}
+
+/* Active note: slim accent bar and a light accent tint instead of a heavy fill. */
+.moc-tree-view .tree-item-self.moc-tree-row.is-active {
+	background-color: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
+	box-shadow: inset 3px 0 0 var(--interactive-accent);
+	color: var(--text-normal);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-row.is-active .tree-item-inner {
+	color: var(--text-normal);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-row.is-match .tree-item-inner {
+	color: var(--text-accent);
+	font-weight: var(--font-semibold);
+}
+
+.moc-tree-view .tree-item-self.moc-tree-row.is-flashing {
+	background-color: var(--text-highlight-bg);
+	transition: background-color 600ms ease-out;
+}
+
+.moc-tree-toolbar {
+	justify-content: center;
+	margin-bottom: var(--size-4-2);
+}
+
+/* ---------------------------------------------------------------- calmer tree */
+
+/* Top-level folders read like chapter headings. */
+.moc-tree-view .moc-tree-root {
+	margin-top: var(--size-4-3);
+}
+
+.moc-tree-view .moc-tree-root:first-child {
+	margin-top: 0;
+}
+
+.moc-tree-view .moc-tree-root > .moc-tree-row .tree-item-inner {
+	font-weight: var(--font-semibold);
+	font-size: calc(var(--moc-tree-font) * 1.08);
+}
+
+/* The way to the active note: accent folder icons and slightly stronger names (lines stay grey). */
+.moc-tree-view .moc-tree-row.is-active-path .moc-tree-row-icon {
+	color: var(--interactive-accent);
+}
+
+.moc-tree-view .moc-tree-row.is-active-path .tree-item-inner {
+	color: var(--text-normal);
+	font-weight: var(--font-semibold);
+}
+
+/* Counts only on closed folders; on open ones the content shows it (hover still shows the count). */
+.moc-tree-view .moc-tree-row.is-open .moc-tree-count {
+	visibility: hidden;
+}
+
+.moc-tree-view .moc-tree-row.is-open:hover .moc-tree-count {
+	visibility: visible;
+}

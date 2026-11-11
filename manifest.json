@@ -1,0 +1,9 @@
+{
+	"id": "moc-tree",
+	"name": "MOC Tree",
+	"version": "0.1.0",
+	"minAppVersion": "1.13.0",
+	"description": "Structure notes without folders: MOC notes with a children list form a tree in the sidebar.",
+	"author": "Josias Strobel",
+	"isDesktopOnly": false
+}
