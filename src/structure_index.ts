@@ -18,6 +18,8 @@ export interface NoteInput {
 	managed: boolean;
 	/** Structure list in file order; null if the note is no MOC. */
 	children: ChildLink[] | null;
+	/** True if the note carries the trash tag. */
+	trashed: boolean;
 }
 
 /** Lookup tables built once per metadata change. */
@@ -29,8 +31,12 @@ export interface StructureIndex {
 	parents: ReadonlyMap<string, readonly string[]>;
 	/** Top-level MOCs: managed MOCs without parent, plus one MOC per otherwise unreachable cycle. */
 	roots: readonly string[];
-	/** Managed normal notes not reachable from any root. */
+	/** Managed normal notes not reachable from any root and not in the trash. */
 	orphans: readonly string[];
+	/** Top-level entries of the trash section: trashed notes not below another trashed note. */
+	trash: readonly string[];
+	/** Trashed notes and everything only reachable through them; hidden in the tree. */
+	in_trash: ReadonlySet<string>;
 }
 
 /** How a tree row is shown. */
@@ -73,16 +79,22 @@ function sort_by_name(paths: string[], notes: ReadonlyMap<string, NoteInput>): s
 	return paths.sort((a, b) => name(a).localeCompare(name(b)) || a.localeCompare(b));
 }
 
-/** Mark every note reachable from `start` (including itself) as visited. */
+/** True if the note carries the trash tag. */
+export function is_trashed(index: Pick<StructureIndex, 'notes'>, path: string): boolean {
+	return index.notes.get(path)?.trashed ?? false;
+}
+
+/** Mark every note reachable from `start` (including itself) as visited; `skip` notes are not entered. */
 function mark_reachable(
 	start: string,
 	children: ReadonlyMap<string, readonly ChildLink[]>,
 	visited: Set<string>,
+	skip: (path: string) => boolean = () => false,
 ): void {
 	const stack = [start];
 	while (stack.length > 0) {
 		const path = stack.pop() as string;
-		if (visited.has(path)) continue;
+		if (visited.has(path) || skip(path)) continue;
 		visited.add(path);
 		for (const child of children.get(path) ?? []) {
 			if (child.path !== null && !visited.has(child.path)) stack.push(child.path);
@@ -108,29 +120,58 @@ export function build_structure_index(inputs: readonly NoteInput[]): StructureIn
 		}
 	}
 
-	const managed_mocs = [...children.keys()].filter((path) => notes.get(path)?.managed);
+	const trashed = (path: string) => notes.get(path)?.trashed ?? false;
+	const managed_mocs = [...children.keys()].filter((path) => notes.get(path)?.managed && !trashed(path));
 	const roots = sort_by_name(
 		managed_mocs.filter((path) => !parents.has(path)),
 		notes,
 	);
 	const visited = new Set<string>();
-	for (const root of roots) mark_reachable(root, children, visited);
+	for (const root of roots) mark_reachable(root, children, visited, trashed);
+
+	// Everything reachable from trashed notes but not from the visible tree belongs to the trash.
+	const trashed_paths = sort_by_name([...notes.keys()].filter(trashed), notes);
+	const trash_reach = new Set<string>();
+	for (const path of trashed_paths) mark_reachable(path, children, trash_reach);
 
 	// MOCs that only hang in a cycle would vanish; show one per cycle at the top level.
-	for (const path of sort_by_name(managed_mocs.filter((p) => !visited.has(p)), notes)) {
+	for (const path of sort_by_name(managed_mocs.filter((p) => !visited.has(p) && !trash_reach.has(p)), notes)) {
 		if (visited.has(path)) continue;
 		roots.push(path);
-		mark_reachable(path, children, visited);
+		mark_reachable(path, children, visited, trashed);
 	}
+	const in_trash = new Set([...trash_reach].filter((path) => !visited.has(path)));
 
 	const orphans = sort_by_name(
 		[...notes.values()]
-			.filter((note) => note.managed && note.children === null && !visited.has(note.path))
+			.filter(
+				(note) =>
+					note.managed && note.children === null && !visited.has(note.path) && !in_trash.has(note.path),
+			)
 			.map((note) => note.path),
 		notes,
 	);
 
-	return { notes, children, parents, roots, orphans };
+	return { notes, children, parents, roots, orphans, trash: trash_tops(trashed_paths, children), in_trash };
+}
+
+/** Trashed notes that are not below another trashed note; one per cycle of trashed folders. */
+function trash_tops(trashed: readonly string[], children: ReadonlyMap<string, readonly ChildLink[]>): string[] {
+	const below = new Set<string>();
+	for (const path of trashed) {
+		for (const child of children.get(path) ?? []) {
+			if (child.path !== null) mark_reachable(child.path, children, below);
+		}
+	}
+	const tops = trashed.filter((path) => !below.has(path));
+	const covered = new Set<string>();
+	for (const path of tops) mark_reachable(path, children, covered);
+	for (const path of trashed) {
+		if (covered.has(path)) continue;
+		tops.push(path);
+		mark_reachable(path, children, covered);
+	}
+	return tops;
 }
 
 /** Describe a single note as a tree row. */
@@ -150,13 +191,17 @@ export function describe_note(index: StructureIndex, path: string, link = path):
 /**
  * Rows below a MOC. `ancestors` are the MOCs on the way from the root down to (and including)
  * `moc_path`; a child that is one of them is returned as `cycle` and must not be expanded.
+ * Trashed children are left out unless `include_trashed` is set (inside the trash section).
  */
 export function child_entries(
 	index: StructureIndex,
 	moc_path: string,
 	ancestors: ReadonlySet<string>,
+	include_trashed = false,
 ): TreeEntry[] {
-	return (index.children.get(moc_path) ?? []).map((child) => {
+	const children = index.children.get(moc_path) ?? [];
+	const shown = include_trashed ? children : children.filter((child) => child.path === null || !is_trashed(index, child.path));
+	return shown.map((child) => {
 		if (child.path === null) {
 			return {
 				kind: 'dead',

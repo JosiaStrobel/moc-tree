@@ -1,14 +1,16 @@
-import { type App, type Component, debounce, getLinkpath, type TFile } from 'obsidian';
+import { type App, type Component, debounce, getAllTags, getLinkpath, type TFile } from 'obsidian';
 import { managed_folders, is_in_folders } from './scope';
 import type { PluginSettings } from './settings';
 import { has_structure, read_aliases, read_title, structure_link_texts } from './structure_frontmatter';
+import { has_trash_tag } from './trash_tag';
 import { build_structure_index, type ChildLink, type NoteInput, type StructureIndex } from './structure_index';
 
 /** Delay before rebuilding after file events, in ms. */
 const REBUILD_DELAY_MS = 300;
 
 /** Read one file's metadata into an index input. */
-function read_note(app: App, file: TFile, managed: boolean, key: string): NoteInput {
+function read_note(app: App, file: TFile, managed: boolean, settings: PluginSettings): NoteInput {
+	const key = settings.structureKey;
 	const cache = app.metadataCache.getFileCache(file);
 	const frontmatter = cache?.frontmatter;
 	let children: ChildLink[] | null = null;
@@ -25,16 +27,16 @@ function read_note(app: App, file: TFile, managed: boolean, key: string): NoteIn
 		aliases: read_aliases(frontmatter),
 		managed,
 		children,
+		trashed: cache ? has_trash_tag(getAllTags(cache) ?? [], settings.trashTag) : false,
 	};
 }
 
 /** All managed notes plus the outside notes reachable through structure lists. */
 export function collect_note_inputs(app: App, settings: PluginSettings): NoteInput[] {
 	const folders = managed_folders(settings.newNoteFolder, settings.watchedFolders);
-	const key = settings.structureKey;
 	const inputs = new Map<string, NoteInput>();
 	for (const file of app.vault.getMarkdownFiles()) {
-		if (is_in_folders(file.path, folders)) inputs.set(file.path, read_note(app, file, true, key));
+		if (is_in_folders(file.path, folders)) inputs.set(file.path, read_note(app, file, true, settings));
 	}
 	// Follow links leaving the managed folders, so moved notes keep their place in the tree.
 	const pending = [...inputs.values()];
@@ -43,7 +45,7 @@ export function collect_note_inputs(app: App, settings: PluginSettings): NoteInp
 			if (child.path === null || inputs.has(child.path)) continue;
 			const file = app.vault.getFileByPath(child.path);
 			if (!file) continue;
-			const input = read_note(app, file, false, key);
+			const input = read_note(app, file, false, settings);
 			inputs.set(file.path, input);
 			pending.push(input);
 		}

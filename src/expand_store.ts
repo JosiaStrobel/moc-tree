@@ -10,10 +10,11 @@ import {
 /** Local storage key (per device and vault) for the expand state. */
 const EXPAND_STATE_KEY = 'moc-tree-expand-state';
 
-/** Expanded tree positions and the orphan section state, persisted per device and vault. */
+/** Expanded tree positions and the orphan and trash section states, persisted per device and vault. */
 export class ExpandStore {
 	private readonly expanded = new Set<string>();
 	orphans_collapsed = false;
+	trash_collapsed = true;
 
 	constructor(private readonly app: App) {}
 
@@ -42,6 +43,12 @@ export class ExpandStore {
 		this.save();
 	}
 
+	/** Collapse or open the trash section and save. */
+	set_trash_collapsed(collapsed: boolean): void {
+		this.trash_collapsed = collapsed;
+		this.save();
+	}
+
 	/** Follow a renamed file in all positions. */
 	rename(old_path: string, new_path: string): void {
 		const keys = rename_in_keys(this.expanded, old_path, new_path);
@@ -56,6 +63,7 @@ export class ExpandStore {
 		this.expanded.clear();
 		for (const key of state.expanded) this.expanded.add(key);
 		this.orphans_collapsed = state.orphansCollapsed;
+		this.trash_collapsed = state.trashCollapsed;
 	}
 
 	/** Save the state on this device, dropping positions of deleted notes. */
@@ -65,6 +73,7 @@ export class ExpandStore {
 			schemaVersion: EXPAND_STATE_SCHEMA_VERSION,
 			expanded: prune_keys(this.expanded, exists),
 			orphansCollapsed: this.orphans_collapsed,
+			trashCollapsed: this.trash_collapsed,
 		};
 		this.app.saveLocalStorage(EXPAND_STATE_KEY, state);
 	}

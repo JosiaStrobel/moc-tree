@@ -6,7 +6,9 @@ import { t } from './i18n';
 import type { PluginSettings } from './settings';
 import { convert_to_folder, convert_to_note, file_at } from './structure_actions';
 import { display_name, type StructureIndex, type TreeEntry } from './structure_index';
-import { add_file_in_items, add_reorder_items, add_unfile_item } from './tree_menu_move';
+import { add_trash_item } from './trash_actions';
+import type { TreeClipboard } from './tree_clipboard';
+import { add_pick_items, add_put_item, add_reorder_items, add_unfile_item } from './tree_menu_move';
 
 /** Turn a folder into a note; asks where its children go if it still has some. */
 function start_convert_to_note(
@@ -32,15 +34,18 @@ function start_convert_to_note(
 	}).open();
 }
 
-/** Rarely used items: open, reorder, expand/collapse subtree, move to, also file in. */
+/** Rarely used items: open, reorder, expand/collapse subtree, put here, move, also file in. */
 function add_more_items(
 	menu: Menu,
 	app: App,
 	settings: PluginSettings,
 	index: StructureIndex,
+	clipboard: TreeClipboard,
 	file: TFile,
 	parent_path: string | null,
 	toggle_subtree: ((expand: boolean) => void) | null,
+	/** Folder rows also get "Put here" next to "Move". */
+	is_moc: boolean,
 ): void {
 	menu.addItem((item) =>
 		item
@@ -72,11 +77,12 @@ function add_more_items(
 		);
 	}
 	menu.addSeparator();
-	add_file_in_items(menu, app, settings.structureKey, index, file.path, parent_path);
+	if (is_moc) add_put_item(menu, app, settings.structureKey, index, clipboard, file.path);
+	add_pick_items(menu, clipboard, file.path, parent_path);
 }
 
 /**
- * Context menu for a tree row: create, change title, convert, reorder. Rarely used items appear
+ * Context menu for a tree row: create, change title, convert, trash, reorder. Rarely used items appear
  * after "More …" on desktop; the API cannot change an open menu, so the menu reopens extended
  * at the same spot. On mobile they are always shown.
  */
@@ -84,6 +90,7 @@ export function show_entry_menu(
 	app: App,
 	settings: PluginSettings,
 	index: StructureIndex,
+	clipboard: TreeClipboard,
 	entry: TreeEntry,
 	parent_path: string | null,
 	event: MouseEvent,
@@ -123,15 +130,16 @@ export function show_entry_menu(
 					.onClick(() => void convert_to_folder(app, settings.structureKey, file)),
 	);
 	add_unfile_item(menu, app, settings.structureKey, index, file.path, parent_path);
+	add_trash_item(menu, app, settings, file);
 	menu.addSeparator();
 	if (show_more) {
-		add_more_items(menu, app, settings, index, file, parent_path, toggle_subtree);
+		add_more_items(menu, app, settings, index, clipboard, file, parent_path, toggle_subtree, entry.kind === 'moc');
 	} else {
 		menu.addItem((item) =>
 			item
 				.setTitle(t('menu.more'))
 				.setIcon('more-horizontal')
-				.onClick(() => show_entry_menu(app, settings, index, entry, parent_path, event, toggle_subtree, true)),
+				.onClick(() => show_entry_menu(app, settings, index, clipboard, entry, parent_path, event, toggle_subtree, true)),
 		);
 	}
 	menu.showAtMouseEvent(event);

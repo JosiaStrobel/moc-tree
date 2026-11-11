@@ -49,6 +49,23 @@ describe('is_valid_property_key', () => {
 		expect(parse_settings({ treeSize: 'large' }).treeSize).toBe('large');
 		expect(parse_settings({ treeSize: 'huge' }).treeSize).toBe('normal');
 		const old = parse_settings({ schemaVersion: 2, newNoteFolder: 'Z', structureKey: 'kids' });
-		expect(old).toMatchObject({ schemaVersion: 3, newNoteFolder: 'Z', structureKey: 'kids', treeSize: 'normal' });
+		expect(old).toMatchObject({ schemaVersion: 5, newNoteFolder: 'Z', structureKey: 'kids', treeSize: 'normal' });
+	});
+});
+
+describe('trash tag', () => {
+	it('strips a leading # and rejects invalid tags', () => {
+		expect(parse_settings({ trashTag: ' #müll/alt ' }).trashTag).toBe('müll/alt');
+		expect(parse_settings({ trashTag: 'a b' }).trashTag).toBe(DEFAULT_SETTINGS.trashTag);
+		expect(parse_settings({ trashTag: '123' }).trashTag).toBe(DEFAULT_SETTINGS.trashTag);
+		expect(parse_settings({ schemaVersion: 3 }).trashTag).toBe('papierkorb');
+	});
+});
+
+describe('structure file', () => {
+	it('is off by default, keeps booleans and migrates schema 4', () => {
+		expect(parse_settings({ schemaVersion: 4 }).structureFile).toBe(false);
+		expect(parse_settings({ structureFile: true }).structureFile).toBe(true);
+		expect(parse_settings({ structureFile: 'yes' }).structureFile).toBe(false);
 	});
 });

@@ -32,6 +32,7 @@ describe('cycle_members', () => {
 		title: path,
 		aliases: [],
 		managed: true,
+		trashed: false,
 		children: kids.map((kid) => ({ link: kid, path: kid })),
 	});
 

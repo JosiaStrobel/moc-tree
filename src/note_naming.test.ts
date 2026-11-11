@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { build_note_content, clean_title, sanitize_file_name, timestamp_id, unique_name } from './note_naming';
+import { build_note_content, clean_title, parse_synonyms, sanitize_file_name, timestamp_id, unique_name } from './note_naming';
 
 describe('timestamp_id', () => {
 	it('formats local time with seconds and a suffix', () => {
@@ -41,6 +41,19 @@ describe('build_note_content', () => {
 	it('adds an empty structure list for folders and quotes tricky titles', () => {
 		expect(build_note_content('Kapitel: 1', 'children')).toBe(
 			'---\ntitle: "Kapitel: 1"\naliases:\n  - "Kapitel: 1"\nchildren: []\n---\n',
+		);
+	});
+});
+
+describe('parse_synonyms', () => {
+	it('splits, trims and drops empty entries, duplicates and the title', () => {
+		expect(parse_synonyms(' Lenses, , Linsen ,Lenses', 'Linsen')).toEqual(['Lenses']);
+		expect(parse_synonyms('   ', 'Linsen')).toEqual([]);
+	});
+
+	it('adds synonyms after the title in aliases', () => {
+		expect(build_note_content('Linsen', null, ['Lenses', 'Optik: Linsen'])).toBe(
+			'---\ntitle: Linsen\naliases:\n  - Linsen\n  - Lenses\n  - "Optik: Linsen"\n---\n',
 		);
 	});
 });

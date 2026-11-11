@@ -10,6 +10,7 @@ function note(path: string, kids?: string[]): NoteInput {
 		title: path,
 		aliases: [],
 		managed: true,
+		trashed: false,
 		children: kids?.map((kid) => ({ link: kid, path: kid })) ?? null,
 	};
 }

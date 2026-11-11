@@ -26,7 +26,7 @@ export function move_problem(index: StructureIndex, request: MoveRequest): strin
 }
 
 /** Predicate for list values of `moc` that link to `target_path`. */
-function links_to(app: App, moc: TFile, target_path: string): (value: string) => boolean {
+export function links_to(app: App, moc: TFile, target_path: string): (value: string) => boolean {
 	return (value) => {
 		const link_path = wiki_link_path(value);
 		return link_path !== null && app.metadataCache.getFirstLinkpathDest(link_path, moc.path)?.path === target_path;

@@ -1,8 +1,8 @@
 import type { App, Menu } from 'obsidian';
-import { FolderPickModal } from './folder_pick_modal';
 import { t } from './i18n';
-import { is_within, type StructureIndex } from './structure_index';
+import { is_trashed, type StructureIndex } from './structure_index';
 import { move_entry, type MoveRequest } from './structure_moves';
+import { put_request, type TreeClipboard } from './tree_clipboard';
 
 /** Bound move for one entry taken from `parent`. */
 function mover(app: App, key: string, index: StructureIndex, path: string, parent: string | null) {
@@ -40,7 +40,9 @@ export function add_reorder_items(
 ): void {
 	if (parent === null) return;
 	const move = mover(app, key, index, path, parent);
-	const siblings = (index.children.get(parent) ?? []).flatMap((child) => (child.path === null ? [] : [child.path]));
+	const siblings = (index.children.get(parent) ?? []).flatMap((child) =>
+		child.path === null || is_trashed(index, child.path) ? [] : [child.path],
+	);
 	const position = siblings.indexOf(path);
 	const above = siblings[position - 1];
 	const below = siblings[position + 1];
@@ -64,36 +66,48 @@ export function add_reorder_items(
 	);
 }
 
-/** "Move to …" and "Also file in …" with a folder search. */
-export function add_file_in_items(
-	menu: Menu,
-	app: App,
-	key: string,
-	index: StructureIndex,
-	path: string,
-	parent: string | null,
-): void {
-	const move = mover(app, key, index, path, parent);
-	const pick = (copy: boolean) => {
-		const filed_in = index.parents.get(path) ?? [];
-		new FolderPickModal(
-			app,
-			index,
-			(folder) => !is_within(index, path, folder) && !filed_in.includes(folder),
-			(folder) => move({ to: folder, anchor: null, copy }),
-		).open();
-	};
+/** "Move" and "Also file in": pick the entry; the target folder's menu then offers "Put here". */
+export function add_pick_items(menu: Menu, clipboard: TreeClipboard, path: string, parent: string | null): void {
 	menu.addItem((item) =>
 		item
 			.setTitle(t('menu.move_to'))
 			.setIcon('folder-input')
-			.onClick(() => pick(false)),
+			.onClick(() => clipboard.set({ path, from: parent, copy: false })),
 	);
 	if (parent === null) return;
 	menu.addItem((item) =>
 		item
 			.setTitle(t('menu.also_file_in'))
 			.setIcon('copy-plus')
-			.onClick(() => pick(true)),
+			.onClick(() => clipboard.set({ path, from: parent, copy: true })),
 	);
+}
+
+/**
+ * "Put here" for the picked entry, into folder `to` (null = orphans); disabled where it cannot go.
+ * Adds nothing and returns false while no entry is picked.
+ */
+export function add_put_item(
+	menu: Menu,
+	app: App,
+	key: string,
+	index: StructureIndex,
+	clipboard: TreeClipboard,
+	to: string | null,
+): boolean {
+	const pending = clipboard.pending;
+	if (!pending) return false;
+	const request = put_request(index, pending, to);
+	menu.addItem((item) =>
+		item
+			.setTitle(t('menu.put_here'))
+			.setIcon('clipboard-paste')
+			.setDisabled(request === null)
+			.onClick(() => {
+				if (!request) return;
+				clipboard.set(null);
+				void move_entry(app, key, index, request);
+			}),
+	);
+	return true;
 }

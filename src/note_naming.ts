@@ -45,10 +45,21 @@ export function clean_title(title: string): string | null {
 	return cleaned === '' || /[\r\n]/.test(cleaned) ? null : cleaned;
 }
 
-/** Frontmatter for a new note; folder notes get an empty structure list. */
-export function build_note_content(title: string, structure_key: string | null): string {
+/** Split comma-separated synonyms; drops empty entries, duplicates and the title itself. */
+export function parse_synonyms(input: string, title: string): string[] {
+	const result: string[] = [];
+	for (const part of input.split(',')) {
+		const synonym = clean_title(part);
+		if (synonym !== null && synonym !== title && !result.includes(synonym)) result.push(synonym);
+	}
+	return result;
+}
+
+/** Frontmatter for a new note; synonyms follow the title in `aliases`, folder notes get an empty structure list. */
+export function build_note_content(title: string, structure_key: string | null, synonyms: string[] = []): string {
 	const value = format_scalar(title, '');
 	const lines = ['---', `title: ${value}`, 'aliases:', `  - ${value}`];
+	for (const synonym of synonyms) lines.push(`  - ${format_scalar(synonym, '')}`);
 	if (structure_key !== null) lines.push(`${structure_key}: []`);
 	lines.push('---', '');
 	return lines.join('\n');

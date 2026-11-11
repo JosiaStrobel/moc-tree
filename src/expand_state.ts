@@ -1,7 +1,7 @@
 /** Stored expand state of the structure sidebar (no Obsidian dependency). */
 
 /** Current version of the stored expand state format. */
-export const EXPAND_STATE_SCHEMA_VERSION = 1;
+export const EXPAND_STATE_SCHEMA_VERSION = 2;
 
 /** Separator between the MOC paths of a tree position key. */
 const KEY_SEPARATOR = '\n';
@@ -12,6 +12,8 @@ export interface ExpandState {
 	/** Expanded tree positions: MOC paths from the root, joined by a line break. */
 	expanded: string[];
 	orphansCollapsed: boolean;
+	/** The trash section starts collapsed. */
+	trashCollapsed: boolean;
 }
 
 /** Key of a tree position: the MOC chain from the root, since a note can appear several times. */
@@ -21,14 +23,21 @@ export function position_key(ancestors: readonly string[], path: string): string
 
 /** Validate stored data; unknown or broken data gives an empty state. */
 export function parse_expand_state(raw: unknown): ExpandState {
-	const state: ExpandState = { schemaVersion: EXPAND_STATE_SCHEMA_VERSION, expanded: [], orphansCollapsed: false };
+	const state: ExpandState = {
+		schemaVersion: EXPAND_STATE_SCHEMA_VERSION,
+		expanded: [],
+		orphansCollapsed: false,
+		trashCollapsed: true,
+	};
 	if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return state;
 	const record = raw as Record<string, unknown>;
-	if (record.schemaVersion !== EXPAND_STATE_SCHEMA_VERSION) return state;
+	// Schema 1 lacked trashCollapsed (default applies).
+	if (record.schemaVersion !== 1 && record.schemaVersion !== EXPAND_STATE_SCHEMA_VERSION) return state;
 	if (Array.isArray(record.expanded)) {
 		state.expanded = [...new Set(record.expanded.filter((key): key is string => typeof key === 'string' && key !== ''))];
 	}
 	state.orphansCollapsed = record.orphansCollapsed === true;
+	state.trashCollapsed = record.trashCollapsed !== false;
 	return state;
 }
 

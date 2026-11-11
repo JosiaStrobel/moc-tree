@@ -55,18 +55,20 @@ export async function convert_to_note(
 	children: readonly ChildLink[],
 	target: TFile | null,
 ): Promise<boolean> {
-	if (target) {
-		const items = children
-			.filter((child) => child.path !== target.path)
-			.map((child) => item_for_link(app, child, target));
-		const moved = await edit_file(app, target, (text) => {
-			let next: string | null = text;
-			for (const item of items) next = next === null ? null : insert_list_item(next, key, item);
-			return next;
-		});
-		if (!moved) return false;
-	}
+	if (target && !(await append_links(app, key, target, children))) return false;
 	return edit_file(app, file, (text) => remove_key(text, key));
+}
+
+/** Append existing child links to the end of a MOC's structure list in one write. */
+export async function append_links(app: App, key: string, target: TFile, children: readonly ChildLink[]): Promise<boolean> {
+	const items = children
+		.filter((child) => child.path !== target.path)
+		.map((child) => item_for_link(app, child, target));
+	return edit_file(app, target, (text) => {
+		let next: string | null = text;
+		for (const item of items) next = next === null ? null : insert_list_item(next, key, item);
+		return next;
+	});
 }
 
 /** File for a path, or null if it does not exist (anymore). */

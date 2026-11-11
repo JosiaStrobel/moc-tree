@@ -22,13 +22,13 @@ function rank(text: string, query: string): number | null {
 
 /**
  * Managed notes matching the query, best first: title prefix, title contains,
- * alias prefix, alias contains; ties sorted by name. Empty query lists all notes.
+ * alias prefix, alias contains; ties sorted by name. Empty query lists all notes; trashed notes are skipped.
  */
 export function search_notes(notes: Iterable<NoteInput>, query: string, limit: number): NoteMatch[] {
 	const folded = fold(query.trim());
 	const hits: { match: NoteMatch; score: number }[] = [];
 	for (const note of notes) {
-		if (!note.managed) continue;
+		if (!note.managed || note.trashed) continue;
 		const name = display_name(note);
 		const name_rank = rank(name, folded);
 		if (name_rank !== null) {

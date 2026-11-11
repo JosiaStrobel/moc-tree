@@ -1,10 +1,12 @@
 import { type App, Modal, Setting } from 'obsidian';
 import { t } from './i18n';
-import { clean_title, sanitize_file_name } from './note_naming';
+import { clean_title, parse_synonyms, sanitize_file_name } from './note_naming';
 
 /** Values entered in the new-note dialog. */
 export interface NewNoteInput {
 	title: string;
+	/** Optional further aliases, without the title. */
+	synonyms: string[];
 	/** Chosen file name without extension; null when the naming scheme decides. */
 	file_name: string | null;
 }
@@ -12,6 +14,7 @@ export interface NewNoteInput {
 /** Dialog asking for the title and, if configured, the file name of a new note. */
 export class NewNoteModal extends Modal {
 	private title_value = '';
+	private synonyms_value = '';
 	private file_name_value = '';
 	private file_name_edited = false;
 
@@ -38,6 +41,11 @@ export class NewNoteModal extends Modal {
 			});
 			window.setTimeout(() => text.inputEl.focus(), 0);
 		});
+
+		new Setting(this.contentEl)
+			.setName(t('modal.new_note.synonyms'))
+			.setDesc(t('modal.new_note.synonyms_desc'))
+			.addText((text) => text.onChange((value) => (this.synonyms_value = value)));
 
 		if (this.ask_file_name) {
 			new Setting(this.contentEl).setName(t('modal.new_note.file_name')).addText((text) => {
@@ -73,6 +81,11 @@ export class NewNoteModal extends Modal {
 			return;
 		}
 		let file_name: string | null = null;
+		new Setting(this.contentEl)
+			.setName(t('modal.new_note.synonyms'))
+			.setDesc(t('modal.new_note.synonyms_desc'))
+			.addText((text) => text.onChange((value) => (this.synonyms_value = value)));
+
 		if (this.ask_file_name) {
 			file_name = sanitize_file_name(this.file_name_value || title);
 			if (file_name === '') {
@@ -81,7 +94,7 @@ export class NewNoteModal extends Modal {
 			}
 		}
 		this.close();
-		this.on_submit({ title, file_name });
+		this.on_submit({ title, synonyms: parse_synonyms(this.synonyms_value, title), file_name });
 	}
 
 	/** Show a validation message below the inputs. */

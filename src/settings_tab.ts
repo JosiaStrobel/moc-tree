@@ -3,7 +3,7 @@ import { FolderSuggestModal } from './folder_suggest_modal';
 import { t } from './i18n';
 import type MainPlugin from './main';
 import { clean_folder_path } from './scope';
-import { DEFAULT_SETTINGS, is_valid_property_key, parse_settings } from './settings';
+import { clean_tag, DEFAULT_SETTINGS, is_valid_property_key, is_valid_tag, parse_settings } from './settings';
 
 /** Settings tab of the plugin, built with the declarative settings API. */
 export class SettingsTab extends PluginSettingTab {
@@ -79,6 +79,17 @@ export class SettingsTab extends PluginSettingTab {
 						},
 					},
 					{
+						name: t('settings.trash_tag.name'),
+						desc: t('settings.trash_tag.desc'),
+						control: {
+							type: 'text',
+							key: 'trashTag',
+							defaultValue: DEFAULT_SETTINGS.trashTag,
+							placeholder: DEFAULT_SETTINGS.trashTag,
+							validate: (value) => (is_valid_tag(clean_tag(value)) ? undefined : t('settings.trash_tag.invalid')),
+						},
+					},
+					{
 						name: t('settings.tree_size.name'),
 						desc: t('settings.tree_size.desc'),
 						control: {
@@ -91,6 +102,11 @@ export class SettingsTab extends PluginSettingTab {
 								large: t('settings.tree_size.large'),
 							},
 						},
+					},
+					{
+						name: t('settings.structure_file.name'),
+						desc: t('settings.structure_file.desc'),
+						control: { type: 'toggle', key: 'structureFile', defaultValue: DEFAULT_SETTINGS.structureFile },
 					},
 				],
 			},

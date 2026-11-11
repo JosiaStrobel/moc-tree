@@ -4,11 +4,15 @@ import { parse_expand_state, position_key, prune_keys, rename_in_keys } from './
 describe('parse_expand_state', () => {
 	it('reads valid data and drops bad entries', () => {
 		const state = parse_expand_state({ schemaVersion: 1, expanded: ['a.md', 'a.md', 3, ''], orphansCollapsed: true });
-		expect(state).toEqual({ schemaVersion: 1, expanded: ['a.md'], orphansCollapsed: true });
+		expect(state).toEqual({ schemaVersion: 2, expanded: ['a.md'], orphansCollapsed: true, trashCollapsed: true });
+	});
+
+	it('keeps an opened trash section', () => {
+		expect(parse_expand_state({ schemaVersion: 2, expanded: [], trashCollapsed: false }).trashCollapsed).toBe(false);
 	});
 
 	it('starts empty for missing, broken or unknown versions', () => {
-		const empty = { schemaVersion: 1, expanded: [], orphansCollapsed: false };
+		const empty = { schemaVersion: 2, expanded: [], orphansCollapsed: false, trashCollapsed: true };
 		expect(parse_expand_state(null)).toEqual(empty);
 		expect(parse_expand_state('x')).toEqual(empty);
 		expect(parse_expand_state({ schemaVersion: 99, expanded: ['a.md'] })).toEqual(empty);

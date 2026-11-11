@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { build_structure_index, child_entries, is_within, type NoteInput } from './structure_index';
 
 /** Build a note input; `kids` lists child paths (`!name` = dead link). */
-function note(path: string, title: string | null, kids?: string[], managed = true): NoteInput {
+function note(path: string, title: string | null, kids?: string[], managed = true, trashed = false): NoteInput {
 	const basename = path.replace(/^.*\//, '').replace(/\.md$/, '');
 	const children =
 		kids?.map((kid) =>
 			kid.startsWith('!') ? { link: kid.slice(1), path: null } : { link: kid, path: kid },
 		) ?? null;
-	return { path, basename, title, aliases: [], managed, children };
+	return { path, basename, title, aliases: [], managed, children, trashed };
 }
 
 describe('build_structure_index', () => {
@@ -58,6 +58,45 @@ describe('build_structure_index', () => {
 		]);
 		expect(index.roots).toEqual([]);
 		expect(index.orphans).toEqual(['a.md']);
+	});
+});
+
+describe('trash', () => {
+	const index = build_structure_index([
+		note('p.md', 'Physik', ['o.md', 'a.md']),
+		note('o.md', 'Optik', ['l.md', 'b.md', 'x.md'], true, true),
+		note('l.md', 'Linsen'),
+		note('b.md', 'B', undefined, true, true),
+		note('x.md', 'X'),
+		note('m.md', 'Mathe', ['x.md']),
+		note('a.md', 'A'),
+		note('t.md', 'T', [], true, true),
+		note('w.md', 'W', undefined, true, true),
+	]);
+
+	it('hides trashed notes and their exclusive children from tree and orphans', () => {
+		expect(index.roots).toEqual(['m.md', 'p.md']);
+		expect(index.orphans).toEqual([]);
+		expect([...index.in_trash].sort()).toEqual(['b.md', 'l.md', 'o.md', 't.md', 'w.md']);
+		expect(child_entries(index, 'p.md', new Set(['p.md'])).map((row) => row.path)).toEqual(['a.md']);
+	});
+
+	it('lists trashed notes not below another trashed note, with their children', () => {
+		expect(index.trash).toEqual(['o.md', 't.md', 'w.md']);
+		expect(child_entries(index, 'o.md', new Set(['o.md']), true).map((row) => row.path)).toEqual([
+			'l.md',
+			'b.md',
+			'x.md',
+		]);
+	});
+
+	it('keeps one entry per cycle of trashed folders', () => {
+		const cycle = build_structure_index([
+			note('a.md', 'A', ['b.md'], true, true),
+			note('b.md', 'B', ['a.md'], true, true),
+		]);
+		expect(cycle.trash).toEqual(['a.md']);
+		expect(cycle.roots).toEqual([]);
 	});
 });
 

@@ -1,7 +1,7 @@
 import { clean_folder_path } from './scope';
 
 /** Current version of the stored settings format. */
-export const SETTINGS_SCHEMA_VERSION = 3;
+export const SETTINGS_SCHEMA_VERSION = 5;
 
 /** How new notes get their file name. */
 export const FILE_NAMING_MODES = ['timestamp', 'ask'] as const;
@@ -24,6 +24,10 @@ export interface PluginSettings {
 	structureKey: string;
 	/** Size of the structure sidebar. */
 	treeSize: TreeSize;
+	/** Tag (without `#`) that moves a note to the trash. */
+	trashTag: string;
+	/** Keep a local Markdown overview of the structure for AI tools. */
+	structureFile: boolean;
 }
 
 /** Defaults for missing or invalid settings. */
@@ -34,6 +38,8 @@ export const DEFAULT_SETTINGS: Readonly<PluginSettings> = {
 	fileNaming: 'timestamp',
 	structureKey: 'children',
 	treeSize: 'normal',
+	trashTag: 'papierkorb',
+	structureFile: false,
 };
 
 /** True for plain objects. */
@@ -44,6 +50,16 @@ function is_record(value: unknown): value is Record<string, unknown> {
 /** True for a usable frontmatter key: letters, digits, `_` and `-`. */
 export function is_valid_property_key(key: string): boolean {
 	return /^[\p{L}\p{N}_-]+$/u.test(key);
+}
+
+/** Tag text without a leading `#`, trimmed. */
+export function clean_tag(tag: string): string {
+	return tag.trim().replace(/^#/, '');
+}
+
+/** True for a usable tag: letters, digits, `_`, `-`, `/` and not only digits. */
+export function is_valid_tag(tag: string): boolean {
+	return /^[\p{L}\p{N}_/-]+$/u.test(tag) && !/^\d+$/.test(tag);
 }
 
 /** Clean a folder list: normalize paths, drop empty entries and duplicates. */
@@ -60,7 +76,8 @@ function parse_folder_list(raw: unknown): string[] {
 export function parse_settings(raw: unknown): PluginSettings {
 	const settings: PluginSettings = { ...DEFAULT_SETTINGS, watchedFolders: [] };
 	if (!is_record(raw)) return settings;
-	// Schema 1 only had the template's example setting; schema 2 lacked treeSize (default applies).
+	// Schema 1 only had the template's example setting; schemas 2 to 4 lacked treeSize, trashTag or structureFile
+	// (defaults apply).
 	if (typeof raw.newNoteFolder === 'string') {
 		settings.newNoteFolder = clean_folder_path(raw.newNoteFolder);
 	}
@@ -72,5 +89,9 @@ export function parse_settings(raw: unknown): PluginSettings {
 		settings.structureKey = raw.structureKey.trim();
 	}
 	if (TREE_SIZES.includes(raw.treeSize as TreeSize)) settings.treeSize = raw.treeSize as TreeSize;
+	if (typeof raw.trashTag === 'string' && is_valid_tag(clean_tag(raw.trashTag))) {
+		settings.trashTag = clean_tag(raw.trashTag);
+	}
+	if (typeof raw.structureFile === 'boolean') settings.structureFile = raw.structureFile;
 	return settings;
 }

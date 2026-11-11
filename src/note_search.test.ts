@@ -3,8 +3,8 @@ import { search_notes } from './note_search';
 import type { NoteInput } from './structure_index';
 
 /** Build a managed note input. */
-function note(path: string, title: string | null, aliases: string[] = [], managed = true): NoteInput {
-	return { path, basename: path.replace(/\.md$/, ''), title, aliases, managed, children: null };
+function note(path: string, title: string | null, aliases: string[] = [], managed = true, trashed = false): NoteInput {
+	return { path, basename: path.replace(/\.md$/, ''), title, aliases, managed, children: null, trashed };
 }
 
 const NOTES = [
@@ -33,5 +33,9 @@ describe('search_notes', () => {
 	it('lists all managed notes for an empty query, using the file name without title', () => {
 		const hits = search_notes(NOTES, '', 3);
 		expect(hits.map((hit) => hit.name)).toEqual(['5', 'Ähnlichkeit', 'Brechung an Linsen']);
+	});
+
+	it('skips trashed notes', () => {
+		expect(search_notes([note('t.md', 'Optik alt', [], true, true)], 'optik', 10)).toEqual([]);
 	});
 });

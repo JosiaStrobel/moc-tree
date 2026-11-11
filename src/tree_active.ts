@@ -28,10 +28,14 @@ export function mark_active_rows(tree_el: HTMLElement, active_path: string | und
 /** How long a revealed row stays highlighted, in ms. */
 const FLASH_MS = 1500;
 
-/** Row of a tree position; `in_orphans` picks the orphan section instead of the tree. */
-export function find_row(tree_el: HTMLElement, key: string, in_orphans = false): HTMLElement | null {
+/** Row of a tree position; `section` (CSS class) picks a section such as the orphans instead of the tree. */
+export function find_row(tree_el: HTMLElement, key: string, section: string | null = null): HTMLElement | null {
+	const in_place = (row: HTMLElement) => {
+		const block = row.closest('.moc-tree-section-block');
+		return section === null ? block === null : block?.hasClass(section) === true;
+	};
 	const rows = Array.from(tree_el.querySelectorAll<HTMLElement>('.moc-tree-row'));
-	return rows.find((row) => row.dataset.key === key && (row.closest('.moc-tree-orphans') !== null) === in_orphans) ?? null;
+	return rows.find((row) => row.dataset.key === key && in_place(row)) ?? null;
 }
 
 /** Scroll a row into view and highlight it briefly. */

@@ -1,4 +1,4 @@
-import { ItemView, Keymap, Notice, Platform, SearchComponent, setIcon, type TFile, type WorkspaceLeaf } from 'obsidian';
+import { ItemView, Keymap, Notice, Platform, SearchComponent, type TFile, type WorkspaceLeaf } from 'obsidian';
 import { check_structure } from './check_structure';
 import { DoubleClickTracker } from './double_click';
 import { position_key } from './expand_state';
@@ -7,32 +7,25 @@ import { t } from './i18n';
 import { type PluginSettings, TREE_SIZES } from './settings';
 import { child_entries, describe_note, type StructureIndex, type TreeEntry } from './structure_index';
 import type { StructureStore } from './structure_store';
+import { TreeClipboard } from './tree_clipboard';
 import { TreeDrag } from './tree_drag';
 import { build_search_filter, find_positions, type SearchFilter } from './tree_find';
 import { subtree_keys } from './tree_keys';
 import { find_row, flash_row, mark_active_rows } from './tree_active';
-import { render_markers } from './tree_markers';
 import { show_entry_menu } from './tree_menu';
+import { render_pending_bar } from './tree_pending_bar';
+import { create_row, MAX_INDENT_DEPTH } from './tree_row';
+import { render_orphans, render_trash, type SectionHost } from './tree_sections';
 import { render_toolbar } from './tree_toolbar';
+import { show_trash_menu } from './trash_actions';
 
 export const STRUCTURE_VIEW_TYPE = 'moc-tree-structure';
 
-/** Deepest level with its own indentation step in the stylesheet. */
-const MAX_INDENT_DEPTH = 12;
 /** Maximum number of search hits shown. */
 const MAX_SEARCH_HITS = 500;
 
-/** Row icon per kind; folders show an open folder while expanded. */
-/** Plain notes get no icon; their name starts where a folder's icon sits, under the parent's name. */
-const ROW_ICONS: Record<TreeEntry['kind'], (open: boolean) => string | null> = {
-	moc: (open) => (open ? 'folder-open' : 'folder'),
-	note: () => null,
-	dead: () => 'file-x',
-	cycle: () => 'folder-sync',
-};
-
 /**
- * Sidebar with search, the MOC tree and the orphan list.
+ * Sidebar with search, the MOC tree, the orphan list and the trash.
  * Row listeners are attached to row elements directly; they are dropped with the rows on re-render.
  */
 export class StructureView extends ItemView {
@@ -40,6 +33,9 @@ export class StructureView extends ItemView {
 	/** Drag and drop on desktop only; touch uses the context menu. */
 	private readonly drag: TreeDrag | null;
 	private readonly clicks = new DoubleClickTracker();
+	/** Entry picked with "Move" or "Also file in", put with "Put here" (touch-friendly moving). */
+	private readonly clipboard = new TreeClipboard(() => this.render());
+	private pending_el: HTMLElement | null = null;
 	private search: SearchComponent | null = null;
 	private tree_el: HTMLElement | null = null;
 	private query = '';
@@ -94,7 +90,11 @@ export class StructureView extends ItemView {
 			this.query = value;
 			this.render();
 		});
+		this.pending_el = header.createDiv({ cls: 'moc-tree-pending-bar' });
 		this.tree_el = this.contentEl.createDiv({ cls: 'moc-tree-tree' });
+		this.registerDomEvent(this.contentEl, 'keydown', (event) => {
+			if (event.key === 'Escape' && this.clipboard.pending) this.clipboard.set(null);
+		});
 		this.register(this.store.on_change(() => this.render()));
 		this.registerEvent(this.app.vault.on('rename', (file, old_path) => this.expand.rename(old_path, file.path)));
 		this.registerEvent(this.app.workspace.on('file-open', () => this.mark_active()));
@@ -119,14 +119,12 @@ export class StructureView extends ItemView {
 		const index = this.store.get_index();
 		const positions = find_positions(index, path);
 		if (positions.length === 0) {
-			if (!index.orphans.includes(path)) {
-				this.render();
-				new Notice(t('notice.reveal_missing'));
-				return;
-			}
-			this.expand.set_orphans_collapsed(false);
+			const section = index.orphans.includes(path) ? 'moc-tree-orphans' : index.in_trash.has(path) ? 'moc-tree-trash' : null;
+			if (section === 'moc-tree-orphans') this.expand.set_orphans_collapsed(false);
+			if (section === 'moc-tree-trash') this.expand.set_trash_collapsed(false);
 			this.render();
-			if (this.tree_el) flash_row(find_row(this.tree_el, position_key([], path), true));
+			if (section === null) new Notice(t('notice.reveal_missing'));
+			else if (this.tree_el) flash_row(find_row(this.tree_el, position_key([], path), section));
 			return;
 		}
 		const cursor = this.reveal_cursor;
@@ -152,9 +150,11 @@ export class StructureView extends ItemView {
 		if (!tree_el) return;
 		const index = this.store.get_index();
 		tree_el.empty();
+		this.clipboard.revalidate(index);
+		if (this.pending_el) render_pending_bar(this.pending_el, index, this.clipboard);
 		for (const size of TREE_SIZES) this.contentEl.toggleClass(`mod-size-${size}`, size === this.get_settings().treeSize);
 
-		if (index.roots.length === 0 && index.orphans.length === 0) {
+		if (index.roots.length === 0 && index.orphans.length === 0 && index.trash.length === 0) {
 			tree_el.createDiv({ cls: 'pane-empty', text: t('view.empty') });
 			return;
 		}
@@ -166,31 +166,26 @@ export class StructureView extends ItemView {
 		for (const root of index.roots) {
 			this.render_entry(tree_el, index, describe_note(index, root), [], filter)?.addClass('moc-tree-root');
 		}
-		this.render_orphans(tree_el, index, filter);
+		const host = this.section_host(index);
+		render_orphans(tree_el, host, filter);
+		// Search skips trashed notes, so the trash is only shown without a query.
+		if (!filter && index.trash.length > 0) render_trash(tree_el, host);
 		this.mark_active();
 	}
 
-	/** Collapsible section with all orphans; also a drop target for removing from a folder. */
-	private render_orphans(parent_el: HTMLElement, index: StructureIndex, filter: SearchFilter | null): void {
-		const orphans = filter ? index.orphans.filter((path) => filter.matches.has(path)) : index.orphans;
-		if (filter && orphans.length === 0) return;
-		const collapsed = !filter && this.expand.orphans_collapsed;
-		const section = parent_el.createDiv({ cls: 'tree-item moc-tree-orphans' });
-		const header = section.createDiv({ cls: 'tree-item-self is-clickable moc-tree-section' });
-		header.toggleClass('is-collapsed', collapsed);
-		setIcon(header.createDiv({ cls: 'moc-tree-row-icon' }), 'inbox');
-		header.createDiv({ cls: 'tree-item-inner', text: t('view.orphans_heading') });
-		header.createDiv({ cls: 'moc-tree-count', text: String(orphans.length) });
-		this.drag?.attach_unfile_target(header);
-		header.addEventListener('click', () => {
-			this.expand.set_orphans_collapsed(!this.expand.orphans_collapsed);
-			this.render();
-		});
-		if (collapsed) return;
-		const children_el = section.createDiv({ cls: 'tree-item-children' });
-		for (const path of orphans) {
-			this.render_entry(children_el, index, describe_note(index, path), [], filter);
-		}
+	/** What the orphan and trash sections need from the sidebar. */
+	private section_host(index: StructureIndex): SectionHost {
+		return {
+			app: this.app,
+			settings: this.get_settings(),
+			index,
+			expand: this.expand,
+			drag: this.drag,
+			clipboard: this.clipboard,
+			rerender: () => this.render(),
+			render_row: (el, path, filter, in_trash) =>
+				this.render_entry(el, index, describe_note(index, path), [], filter, in_trash),
+		};
 	}
 
 	/** One row with icon, name, markers and child count; expanded folders render their children. */
@@ -200,54 +195,51 @@ export class StructureView extends ItemView {
 		entry: TreeEntry,
 		ancestors: readonly string[],
 		filter: SearchFilter | null,
+		in_trash = false,
 	): HTMLElement | null {
 		const path = entry.path;
 		if (filter && (path === null || !(filter.matches.has(path) || filter.ancestors.has(path)))) return null;
 		const item = parent_el.createDiv({ cls: 'tree-item' });
-		const row = item.createDiv({ cls: 'tree-item-self is-clickable moc-tree-row' });
-		row.addClass(`moc-tree-${entry.kind}`);
 		const parent = ancestors[ancestors.length - 1] ?? null;
 		const key = path === null ? null : position_key(ancestors, path);
 		const expandable = entry.kind === 'moc' && key !== null;
 		const is_open = expandable && (this.expand.has(key) || (path !== null && (filter?.ancestors.has(path) ?? false)));
-		row.toggleClass('is-open', is_open);
-		row.toggleClass('is-match', path !== null && (filter?.matches.has(path) ?? false));
-		// Depth drives the indentation in CSS, so folder surfaces can span the full width.
-		row.dataset.depth = String(Math.min(ancestors.length, MAX_INDENT_DEPTH));
-		if (path !== null && key !== null) {
-			row.dataset.path = path;
-			row.dataset.key = key;
-		}
-
-		const icon = ROW_ICONS[entry.kind](is_open);
-		if (icon !== null) setIcon(row.createDiv({ cls: 'moc-tree-row-icon' }), icon);
-		row.createDiv({ cls: 'tree-item-inner', text: entry.name });
-		render_markers(row, index, entry, parent);
-		const child_count = path === null ? 0 : (index.children.get(path)?.length ?? 0);
-		if (entry.kind === 'moc' && child_count > 0) row.createDiv({ cls: 'moc-tree-count', text: String(child_count) });
-		this.drag?.attach_row(row, entry, parent);
+		const chain = path === null ? ancestors : [...ancestors, path];
+		const children = entry.kind === 'moc' && path !== null ? child_entries(index, path, new Set(chain), in_trash) : [];
+		const row = create_row(item, index, entry, {
+			key,
+			depth: ancestors.length,
+			parent,
+			is_open,
+			is_match: path !== null && (filter?.matches.has(path) ?? false),
+			child_count: children.length,
+		});
+		if (!in_trash) this.drag?.attach_row(row, entry, parent);
+		const pending = this.clipboard.pending;
+		if (!in_trash && pending?.path === path && pending.from === parent) row.addClass('moc-tree-picked');
 		row.addEventListener('click', (event) => {
 			if (expandable) this.click_folder(index, ancestors, key, entry, event);
 			else this.open_entry(entry, event);
 		});
 		row.addEventListener('contextmenu', (event) => {
 			event.preventDefault();
+			if (in_trash) {
+				show_trash_menu(this.app, this.get_settings(), index, entry, event);
+				return;
+			}
 			const toggle =
 				expandable && path !== null
 					? (expand: boolean) => this.toggle_subtree(subtree_keys(index, ancestors, path), expand)
 					: null;
-			show_entry_menu(this.app, this.get_settings(), index, entry, parent, event, toggle);
+			show_entry_menu(this.app, this.get_settings(), index, this.clipboard, entry, parent, event, toggle);
 		});
 
 		if (is_open && path !== null) {
 			const children_el = item.createDiv({ cls: 'tree-item-children' });
-			const chain = [...ancestors, path];
 			// The whole open folder (header row and children) forms one surface, shaded by level.
 			item.addClass('moc-tree-block');
 			item.dataset.level = String(Math.min(chain.length, MAX_INDENT_DEPTH));
-			for (const child of child_entries(index, path, new Set(chain))) {
-				this.render_entry(children_el, index, child, chain, filter);
-			}
+			for (const child of children) this.render_entry(children_el, index, child, chain, filter, in_trash);
 		}
 		return item;
 	}

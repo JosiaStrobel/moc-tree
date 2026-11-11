@@ -1,13 +1,13 @@
 /** Locate notes in the tree and compute what a search shows (no Obsidian dependency). */
 import { search_notes } from './note_search';
-import type { StructureIndex } from './structure_index';
+import { is_trashed, type StructureIndex } from './structure_index';
 
 /** Upper bound of positions returned for one note. */
 export const MAX_POSITIONS = 50;
 
 /**
  * All tree positions of a note as ancestor chains from a root (the note itself excluded),
- * shortest first. A root gives one empty chain; orphans and unreachable notes give none.
+ * shortest first. A root gives one empty chain; orphans, trashed and unreachable notes give none.
  */
 export function find_positions(index: StructureIndex, path: string, limit = MAX_POSITIONS): string[][] {
 	const found: string[][] = [];
@@ -15,7 +15,7 @@ export function find_positions(index: StructureIndex, path: string, limit = MAX_
 		if (found.length >= limit) return;
 		const next = [...chain, folder];
 		for (const child of index.children.get(folder) ?? []) {
-			if (child.path === null || next.includes(child.path)) continue;
+			if (child.path === null || next.includes(child.path) || is_trashed(index, child.path)) continue;
 			if (child.path === path) found.push(next);
 			if (index.children.has(child.path)) visit(next, child.path);
 		}

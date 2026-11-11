@@ -25,7 +25,7 @@ async function create_note(app: App, settings: PluginSettings, is_folder: boolea
 	const is_taken = (name: string): boolean => app.vault.getAbstractFileByPath(path_for(name)) !== null;
 	const base = input.file_name ?? timestamp_id(new Date());
 	const name = unique_name(base, is_taken);
-	const content = build_note_content(input.title, is_folder ? settings.structureKey : null);
+	const content = build_note_content(input.title, is_folder ? settings.structureKey : null, input.synonyms);
 	const file = await app.vault.create(path_for(name), content);
 	await app.workspace.getLeaf(false).openFile(file);
 	return file;
