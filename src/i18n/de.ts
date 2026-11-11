@@ -109,6 +109,13 @@ const de: Messages = {
 	'command.write_structure_file': 'Strukturdatei für KI-Werkzeuge schreiben',
 	'notice.structure_file_written': 'Strukturdatei geschrieben: {path}',
 	'notice.structure_file_failed': 'Strukturdatei konnte nicht geschrieben werden, siehe Konsole.',
+	'command.add_missing_titles': 'Fehlende Titel ergänzen',
+	'titles.desc': '{count} verwaltete Notizen haben keinen Titel. Vorschläge prüfen (erste Überschrift, sonst Dateiname); geändert werden nur ausgewählte Notizen. Dateinamen bleiben.',
+	'titles.apply': 'Ausgewählte Titel ergänzen',
+	'titles.none': 'Alle verwalteten Notizen haben einen Titel.',
+	'titles.done': '{count} Titel ergänzt.',
+	'titles.done_skipped': '{count} Titel ergänzt, {skipped} übersprungen (siehe Konsole).',
+	'notice.titles_failed': 'Titel konnten nicht ergänzt werden, siehe Konsole.',
 };
 
 export default de;

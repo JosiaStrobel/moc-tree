@@ -107,6 +107,13 @@ const en = {
 	'command.write_structure_file': 'Write structure file for AI tools',
 	'notice.structure_file_written': 'Structure file written: {path}',
 	'notice.structure_file_failed': 'Could not write the structure file, see console.',
+	'command.add_missing_titles': 'Add missing titles',
+	'titles.desc': '{count} managed notes have no title. Check the proposals (first heading, otherwise the file name); only selected notes are changed. File names stay.',
+	'titles.apply': 'Add selected titles',
+	'titles.none': 'All managed notes have a title.',
+	'titles.done': 'Added {count} titles.',
+	'titles.done_skipped': 'Added {count} titles, skipped {skipped} (see console).',
+	'notice.titles_failed': 'Adding titles failed, see console.',
 } as const;
 
 export type MessageKey = keyof typeof en;

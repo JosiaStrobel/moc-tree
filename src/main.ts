@@ -3,6 +3,7 @@ import { open_new_note_dialog } from './create_note';
 import { set_language, t } from './i18n';
 import { check_structure } from './check_structure';
 import { LinkSuggest } from './link_suggest';
+import { add_missing_titles } from './missing_titles';
 import { file_menu_handler } from './file_menu';
 import { DEFAULT_SETTINGS, parse_settings, type PluginSettings } from './settings';
 import { SettingsTab } from './settings_tab';
@@ -67,6 +68,11 @@ export default class MainPlugin extends Plugin {
 			callback: () => void check_structure(this.app, this.structure, this.settings.structureKey),
 		});
 		this.register_trash_command();
+		this.addCommand({
+			id: 'add-missing-titles',
+			name: t('command.add_missing_titles'),
+			callback: () => add_missing_titles(this.app, this.structure),
+		});
 		this.addCommand({
 			id: 'write-structure-file',
 			name: t('command.write_structure_file'),

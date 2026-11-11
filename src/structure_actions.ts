@@ -4,10 +4,15 @@ import { t } from './i18n';
 import type { ChildLink } from './structure_index';
 
 /**
- * Apply a line-based edit to a file. Writes only if the text really changes;
- * shows a notice and returns false if the frontmatter cannot be edited safely.
+ * Apply a line-based edit to a file. Writes only if the text really changes; returns false
+ * (with a notice unless `notify` is off) if the frontmatter cannot be edited safely.
  */
-export async function edit_file(app: App, file: TFile, edit: (text: string) => string | null): Promise<boolean> {
+export async function edit_file(
+	app: App,
+	file: TFile,
+	edit: (text: string) => string | null,
+	notify = true,
+): Promise<boolean> {
 	const current = await app.vault.cachedRead(file);
 	const preview = edit(current);
 	let ok = preview !== null;
@@ -18,7 +23,7 @@ export async function edit_file(app: App, file: TFile, edit: (text: string) => s
 			return next ?? text;
 		});
 	}
-	if (!ok) new Notice(t('notice.unsafe_frontmatter', { name: file.basename }));
+	if (!ok && notify) new Notice(t('notice.unsafe_frontmatter', { name: file.basename }));
 	return ok;
 }
 

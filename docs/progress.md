@@ -65,6 +65,8 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 - [x] „Hier ablegen“ in Obsidian geprüft (Desktop und Tablet, 2026-11-11)
 - [x] Strukturdatei für KI-Werkzeuge (2026-11-11): `structure_export.ts` (reine Darstellung, mit Tests), `structure_export_writer.ts` (5 s verzögert, nur bei geändertem Inhalt, über `vault.adapter`), Einstellung `structureFile` (Settings-Schema 5, Standard aus), Befehl `write-structure-file`; README-Baustein für die `CLAUDE.md` des Vaults
 - [x] Strukturdatei in Obsidian geprüft (2026-11-11)
+- [x] „Fehlende Titel ergänzen“ (`add-missing-titles`, 2026-11-11): `title_proposal.ts` (Vorschlag aus erster H1 oder Dateiname; mit Tests), `missing_titles.ts`, `missing_titles_modal.ts`; „Titel ändern“ füllt den Vorschlag vor; `edit_file`/`write_title` ohne Einzelhinweis für Sammelaktionen
+- [x] „Fehlende Titel ergänzen“ in Obsidian geprüft (2026-11-11)
 
 ## Bekannte Probleme
 
@@ -80,4 +82,4 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 
 ## Nächster Schritt
 
-Bestehende Notizen übernehmen oder Brotkrumen (Pfad der aktiven Notiz unter dem Suchfeld, Glieder anklickbar). Daneben: README mit Nutzeranleitung, Version 0.2.0, optional privates GitHub-Repo als Backup.
+Brotkrumen (Pfad der aktiven Notiz unter dem Suchfeld, Glieder anklickbar). Daneben: README mit Nutzeranleitung, Version 0.2.0, optional privates GitHub-Repo als Backup.
