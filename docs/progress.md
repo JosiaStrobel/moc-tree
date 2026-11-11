@@ -66,8 +66,9 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 
 ## Notizen zur Sitzung
 
+- 2026-11-11: Erster Commit `f698474` (lokal, kein Remote).
 - 2026-11-10: Konzeptfragen geklärt (freigegebene Ordner statt Tag), `processFrontMatter` verworfen, Einstellungen, Frontmatter-Zeilenmodul und Befehle „Neue Notiz“/„Neue Ordner-Notiz“ umgesetzt und getestet. Zufallssuffix auf zwei Ziffern umgestellt, danach Trennstrich entfernt (`2026111009123048`); ältere Testnotizen mit Strich oder Buchstaben-Suffix bleiben gültig, der Dateiname ist für die Struktur egal. Zyklus-Ersatzwurzel und genauere Waisen-Definition ins Konzept übernommen.
 
 ## Nächster Schritt
 
-Erster Commit. Danach offene Tablet-Tests, README mit Nutzeranleitung, Version 0.2.0.
+Brotkrumen (Pfad der aktiven Notiz unter dem Suchfeld, Glieder anklickbar). Daneben: offene Tablet-Tests, README mit Nutzeranleitung, Version 0.2.0, optional privates GitHub-Repo als Backup.
