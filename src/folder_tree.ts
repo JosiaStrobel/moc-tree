@@ -1,18 +1,18 @@
 /** Read-only tree of real vault folders for the "Folders" section (no Obsidian dependency). */
 import { fold } from './note_search';
 
-/** A Markdown file inside a shown folder, with its display name. */
+/** A file inside a shown folder, with its display name. */
 export interface FolderFile {
 	path: string;
-	/** Title, or the file name as fallback. */
+	/** Notes: title, or the file name as fallback; other files: file name with extension. */
 	name: string;
+	/** True for Markdown notes; only they can be filed into a MOC. */
+	is_note: boolean;
 }
 
-/** A note row of the folder tree. */
-export interface FileNode {
+/** A file row of the folder tree. */
+export interface FileNode extends FolderFile {
 	kind: 'file';
-	path: string;
-	name: string;
 }
 
 /** A real folder with its subfolders first, then its notes. */
@@ -21,7 +21,7 @@ export interface FolderNode {
 	path: string;
 	name: string;
 	children: (FolderNode | FileNode)[];
-	/** Number of notes in this folder and all subfolders. */
+	/** Number of files in this folder and all subfolders. */
 	file_count: number;
 }
 
@@ -35,7 +35,7 @@ function base_name(path: string): string {
 	return path.slice(path.lastIndexOf('/') + 1);
 }
 
-/** Sort children recursively and count the notes. */
+/** Sort children recursively and count the files. */
 function finish(node: FolderNode): number {
 	node.children.sort((a, b) => {
 		if (a.kind !== b.kind) return a.kind === 'folder' ? -1 : 1;
@@ -45,7 +45,7 @@ function finish(node: FolderNode): number {
 	return node.file_count;
 }
 
-/** Build the tree below `root` from the files inside it; folders without notes do not appear. */
+/** Build the tree below `root` from the files inside it; folders without files do not appear. */
 export function build_folder_tree(root: string, files: readonly FolderFile[]): FolderNode {
 	const tree: FolderNode = { kind: 'folder', path: root, name: base_name(root), children: [], file_count: 0 };
 	const folders = new Map<string, FolderNode>([[root, tree]]);
@@ -66,7 +66,7 @@ export function build_folder_tree(root: string, files: readonly FolderFile[]): F
 	return tree;
 }
 
-/** Copy of the tree with only notes whose name contains the query (accent-tolerant); null if none match. */
+/** Copy of the tree with only files whose name contains the query (accent-tolerant); null if none match. */
 export function filter_folder_tree(node: FolderNode, query: string): FolderNode | null {
 	const folded = fold(query.trim());
 	const visit = (folder: FolderNode): FolderNode | null => {

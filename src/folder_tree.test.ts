@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { build_folder_tree, filter_folder_tree, folder_chain, folder_paths } from './folder_tree';
 
 const files = [
-	{ path: 'Bibel/AT/Genesis 10.md', name: 'Genesis 10' },
-	{ path: 'Bibel/AT/Genesis 2.md', name: 'Genesis 2' },
-	{ path: 'Bibel/Übersicht.md', name: 'Übersicht' },
-	{ path: 'Bibel/NT/Römer 1.md', name: 'Römer 1' },
-	{ path: 'Andere/X.md', name: 'X' },
+	{ path: 'Bibel/AT/Genesis 10.md', name: 'Genesis 10', is_note: true },
+	{ path: 'Bibel/AT/Genesis 2.md', name: 'Genesis 2', is_note: true },
+	{ path: 'Bibel/Übersicht.md', name: 'Übersicht', is_note: true },
+	{ path: 'Bibel/NT/Römer 1.md', name: 'Römer 1', is_note: true },
+	{ path: 'Andere/X.md', name: 'X', is_note: true },
+	{ path: 'Medien/Bilder/Karte.png', name: 'Karte.png', is_note: false },
 ];
 
 describe('build_folder_tree', () => {
@@ -17,6 +18,12 @@ describe('build_folder_tree', () => {
 		expect(tree.children.map((child) => child.name)).toEqual(['AT', 'NT', 'Übersicht']);
 		const at = tree.children[0];
 		expect(at?.kind === 'folder' && at.children.map((child) => child.name)).toEqual(['Genesis 2', 'Genesis 10']);
+	});
+
+	it('shows folders that hold only media files', () => {
+		const tree = build_folder_tree('Medien', files);
+		expect(tree.file_count).toBe(1);
+		expect(folder_paths(tree)).toEqual(['Medien', 'Medien/Bilder']);
 	});
 
 	it('handles nested roots and ignores files outside', () => {

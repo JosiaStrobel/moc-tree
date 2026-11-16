@@ -9,9 +9,10 @@ import { add_trash_item } from './trash_actions';
 /** File menu (explorer, tab header) items: reveal in structure; for managed notes also change title and trash. */
 export function file_menu_handler(app: App, get_settings: () => PluginSettings) {
 	return (menu: Menu, file: TAbstractFile): void => {
-		if (!(file instanceof TFile) || file.extension !== 'md') return;
+		if (!(file instanceof TFile)) return;
 		const settings = get_settings();
-		const managed = is_in_folders(file.path, managed_folders(settings.newNoteFolder, settings.watchedFolders));
+		const is_note = file.extension === 'md';
+		const managed = is_note && is_in_folders(file.path, managed_folders(settings.newNoteFolder, settings.watchedFolders));
 		if (!managed && !is_in_folders(file.path, settings.shownFolders)) return;
 		menu.addItem((item) =>
 			item

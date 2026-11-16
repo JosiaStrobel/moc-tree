@@ -71,6 +71,8 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 - [x] Angezeigte Ordner in Obsidian geprüft (2026-11-16)
 - [x] Einordnen aus „Ordner“ (2026-11-16): Ziehen (`TreeDrag.attach_source`) und „Zusätzlich einordnen in“ → „Hier ablegen“; Auswahl merkt sich für Notizen außerhalb der Struktur den Namen (`PendingPut.name`, mit Test)
 - [x] Einordnen aus „Ordner“ in Obsidian geprüft (2026-11-16)
+- [x] Bereich „Ordner“ zeigt alle Dateien (2026-11-16): Medienordner erschienen nicht, weil nur Notizen gelesen wurden. Jetzt `vault.getFiles()`, andere Dateien mit Endung, Einordnen nur für Notizen (`FolderFile.is_note`, mit Test); Neuzeichnen bei `create`/`delete` in angezeigten Ordnern; „Im Baum anzeigen“ im Dateimenü auch für Medien dort
+- [x] Medienordner in Obsidian geprüft (2026-11-16)
 
 ## Bekannte Probleme
 

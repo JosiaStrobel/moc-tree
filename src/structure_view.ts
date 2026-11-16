@@ -1,4 +1,14 @@
-import { ItemView, Keymap, Notice, Platform, SearchComponent, type TFile, type WorkspaceLeaf } from 'obsidian';
+import {
+	debounce,
+	ItemView,
+	Keymap,
+	Notice,
+	Platform,
+	SearchComponent,
+	type TAbstractFile,
+	type TFile,
+	type WorkspaceLeaf,
+} from 'obsidian';
 import { check_structure } from './check_structure';
 import { DoubleClickTracker } from './double_click';
 import { position_key } from './expand_state';
@@ -12,6 +22,7 @@ import { TreeDrag } from './tree_drag';
 import { build_search_filter, find_positions, type SearchFilter } from './tree_find';
 import { subtree_keys } from './tree_keys';
 import { find_row, flash_row, mark_active_rows } from './tree_active';
+import { is_in_folders } from './scope';
 import { show_entry_menu } from './tree_menu';
 import { render_pending_bar } from './tree_pending_bar';
 import { create_row, MAX_INDENT_DEPTH } from './tree_row';
@@ -28,6 +39,9 @@ import { render_toolbar } from './tree_toolbar';
 import { show_trash_menu } from './trash_actions';
 
 export const STRUCTURE_VIEW_TYPE = 'moc-tree-structure';
+
+/** Delay before redrawing after media files in shown folders change, in ms. */
+const MEDIA_REDRAW_DELAY_MS = 300;
 
 /** Maximum number of search hits shown. */
 const MAX_SEARCH_HITS = 500;
@@ -106,6 +120,14 @@ export class StructureView extends ItemView {
 		this.register(this.store.on_change(() => this.render()));
 		this.registerEvent(this.app.vault.on('rename', (file, old_path) => this.expand.rename(old_path, file.path)));
 		this.registerEvent(this.app.workspace.on('file-open', () => this.mark_active()));
+		// Notes refresh through the store; other files in shown folders fire no metadata events.
+		const redraw = debounce(() => this.render(), MEDIA_REDRAW_DELAY_MS, true);
+		const on_file = (file: TAbstractFile) => {
+			if (is_in_folders(file.path, this.get_settings().shownFolders)) redraw();
+		};
+		this.registerEvent(this.app.vault.on('create', on_file));
+		this.registerEvent(this.app.vault.on('delete', on_file));
+		this.register(() => redraw.cancel());
 		this.render();
 		await Promise.resolve();
 	}

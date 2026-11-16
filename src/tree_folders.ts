@@ -19,14 +19,21 @@ import { render_section } from './tree_sections';
 /** CSS class of the folders section. */
 export const FOLDERS_SECTION = 'moc-tree-folders';
 
-/** Trees of the shown real folders; missing or empty folders give no tree. Read-only, nothing is written. */
+/**
+ * Trees of the shown real folders with all files (notes, images, PDFs …); missing or empty
+ * folders give no tree. Read-only, nothing is written.
+ */
 export function collect_folder_trees(app: App, shown: readonly string[]): FolderNode[] {
 	if (shown.length === 0) return [];
 	const files: FolderFile[] = [];
-	for (const file of app.vault.getMarkdownFiles()) {
+	for (const file of app.vault.getFiles()) {
 		if (!shown.some((root) => file.path.startsWith(`${root}/`))) continue;
+		if (file.extension !== 'md') {
+			files.push({ path: file.path, name: file.name, is_note: false });
+			continue;
+		}
 		const title = read_title(app.metadataCache.getFileCache(file)?.frontmatter);
-		files.push({ path: file.path, name: title ?? file.basename });
+		files.push({ path: file.path, name: title ?? file.basename, is_note: true });
 	}
 	return shown.map((root) => build_folder_tree(root, files)).filter((tree) => tree.file_count > 0);
 }
@@ -138,12 +145,12 @@ function render_folder(parent_el: HTMLElement, host: FolderSectionHost, node: Fo
 }
 
 /**
- * One note row: click opens it, modifier click or the menu opens a new tab. Dragging it onto a
- * folder or "Also file in" files it in a MOC; the note itself stays untouched.
+ * One file row: click opens it, modifier click or the menu opens a new tab. Notes can be dragged
+ * onto a folder or picked with "Also file in" to file them in a MOC; the note itself stays untouched.
  */
 function render_file(parent_el: HTMLElement, host: FolderSectionHost, node: FileNode, depth: number): void {
 	const row = create_folder_row(parent_el.createDiv({ cls: 'tree-item' }), node, depth, false);
-	host.drag?.attach_source(row, node.path, null);
+	if (node.is_note) host.drag?.attach_source(row, node.path, null);
 	const pending = host.clipboard.pending;
 	if (pending?.path === node.path && pending.name !== undefined) row.addClass('moc-tree-picked');
 	const open = (new_tab: PaneType | boolean) => {
@@ -156,13 +163,18 @@ function render_file(parent_el: HTMLElement, host: FolderSectionHost, node: File
 		const menu = new Menu();
 		menu.addItem((entry) => entry.setTitle(t('menu.open')).setIcon('file').onClick(() => open(false)));
 		menu.addItem((entry) => entry.setTitle(t('menu.open_new_tab')).setIcon('file-plus').onClick(() => open(true)));
-		menu.addSeparator();
-		menu.addItem((entry) =>
-			entry
-				.setTitle(t('menu.also_file_in'))
-				.setIcon('copy-plus')
-				.onClick(() => host.clipboard.set({ path: node.path, from: null, copy: true, name: node.name })),
-		);
+		if (node.is_note) add_file_in_item(menu, host, node);
 		menu.showAtMouseEvent(event);
 	});
+}
+
+/** "Also file in" for a note: pick it, then "Put here" on a folder files it. */
+function add_file_in_item(menu: Menu, host: FolderSectionHost, node: FileNode): void {
+	menu.addSeparator();
+	menu.addItem((entry) =>
+		entry
+			.setTitle(t('menu.also_file_in'))
+			.setIcon('copy-plus')
+			.onClick(() => host.clipboard.set({ path: node.path, from: null, copy: true, name: node.name })),
+	);
 }
