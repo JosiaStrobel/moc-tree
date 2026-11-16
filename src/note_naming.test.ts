@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { build_note_content, clean_title, parse_synonyms, sanitize_file_name, timestamp_id, unique_name } from './note_naming';
+import { build_note_content, clean_title, default_file_name, parse_synonyms, sanitize_file_name, timestamp_id, unique_name } from './note_naming';
 
 describe('timestamp_id', () => {
 	it('formats local time with seconds and a suffix', () => {
@@ -55,5 +55,18 @@ describe('parse_synonyms', () => {
 		expect(build_note_content('Linsen', null, ['Lenses', 'Optik: Linsen'])).toBe(
 			'---\ntitle: Linsen\naliases:\n  - Linsen\n  - Lenses\n  - "Optik: Linsen"\n---\n',
 		);
+	});
+});
+
+describe('default_file_name', () => {
+	const date = new Date(2026, 10, 16, 9, 5, 7);
+	it('uses the sanitized title in ask mode', () => {
+		expect(default_file_name('ask', 'Buy milk: today?', date)).toBe('Buy milk today');
+	});
+	it('falls back to a timestamp if the title yields no name', () => {
+		expect(default_file_name('ask', '???', date)).toMatch(/^20261116090507\d{2}$/);
+	});
+	it('uses a timestamp in timestamp mode', () => {
+		expect(default_file_name('timestamp', 'Buy milk', date)).toMatch(/^20261116090507\d{2}$/);
 	});
 });

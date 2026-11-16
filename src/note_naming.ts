@@ -31,6 +31,12 @@ export function sanitize_file_name(name: string): string {
 		.replace(/^\.+/, '');
 }
 
+/** File name without the dialog: the title for mode `ask` if it yields a valid name, otherwise a timestamp ID. */
+export function default_file_name(mode: string, title: string, date: Date): string {
+	const from_title = mode === 'ask' ? sanitize_file_name(title) : '';
+	return from_title !== '' ? from_title : timestamp_id(date);
+}
+
 /** First free name: `base`, then `base 2`, `base 3`, … */
 export function unique_name(base: string, is_taken: (name: string) => boolean): string {
 	if (!is_taken(base)) return base;

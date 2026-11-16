@@ -1,4 +1,5 @@
 import { getLanguage, Notice, Plugin } from 'obsidian';
+import { create_api, type MocTreeApi } from './api';
 import { open_new_note_dialog } from './create_note';
 import { set_language, t } from './i18n';
 import { check_structure } from './check_structure';
@@ -23,6 +24,8 @@ export default class MainPlugin extends Plugin {
 	structure = new StructureStore(this.app, () => this.settings);
 	title_sync = new TitleSync(this.app, () => this.settings);
 	structure_file = new StructureExportWriter(this.app, this.structure, () => this.settings);
+	/** Public API for other plugins, e.g. `app.plugins.getPlugin('moc-tree')?.api`. */
+	api: MocTreeApi = create_api(this.app, () => this.settings);
 
 	async onload(): Promise<void> {
 		set_language(getLanguage());
@@ -38,12 +41,12 @@ export default class MainPlugin extends Plugin {
 		this.addCommand({
 			id: 'new-note',
 			name: t('command.new_note'),
-			callback: () => open_new_note_dialog(this.app, this.settings, false),
+			callback: () => void open_new_note_dialog(this.app, this.settings, false),
 		});
 		this.addCommand({
 			id: 'new-folder',
 			name: t('command.new_folder'),
-			callback: () => open_new_note_dialog(this.app, this.settings, true),
+			callback: () => void open_new_note_dialog(this.app, this.settings, true),
 		});
 		this.registerView(STRUCTURE_VIEW_TYPE, (leaf) => new StructureView(leaf, this.structure, () => this.settings));
 		this.addRibbonIcon('list-tree', t('command.open_structure'), () => void open_structure_view(this.app));

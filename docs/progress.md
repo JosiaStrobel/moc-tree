@@ -73,6 +73,9 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 - [x] Einordnen aus „Ordner“ in Obsidian geprüft (2026-11-16)
 - [x] Bereich „Ordner“ zeigt alle Dateien (2026-11-16): Medienordner erschienen nicht, weil nur Notizen gelesen wurden. Jetzt `vault.getFiles()`, andere Dateien mit Endung, Einordnen nur für Notizen (`FolderFile.is_note`, mit Test); Neuzeichnen bei `create`/`delete` in angezeigten Ordnern; „Im Baum anzeigen“ im Dateimenü auch für Medien dort
 - [x] Medienordner in Obsidian geprüft (2026-11-16)
+- [x] Schnittstelle für andere Plugins (2026-11-16): `src/api.ts` (`MocTreeApi` Version 1, `create_note`), Feld `api` in `main.ts`; `create_note.ts` aufgeteilt in `create_note_file` (ohne Öffnen) und `ask_new_note` (Dialog als Promise, Abbrechen → `null`); Dialog mit vorausgefülltem Titel; `default_file_name` (mit Tests). Nebenbei behoben: Dialog hängte bei jedem Absenden ein weiteres Synonym-Feld an
+- [x] Schnittstelle per Konsole geprüft (2026-11-16): Anlegen ohne Dialog, mit Dialog und Öffnen
+- [x] Abbrechen des Dialogs geprüft (Esc → `null`, keine Notiz)
 
 ## Bekannte Probleme
 

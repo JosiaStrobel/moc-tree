@@ -107,13 +107,13 @@ export function show_entry_menu(
 			item
 				.setTitle(t('menu.new_note_here'))
 				.setIcon('file-plus')
-				.onClick(() => open_new_note_dialog(app, settings, false, file)),
+				.onClick(() => void open_new_note_dialog(app, settings, false, file)),
 		);
 		menu.addItem((item) =>
 			item
 				.setTitle(t('menu.new_folder_here'))
 				.setIcon('folder-plus')
-				.onClick(() => open_new_note_dialog(app, settings, true, file)),
+				.onClick(() => void open_new_note_dialog(app, settings, true, file)),
 		);
 		menu.addSeparator();
 	}

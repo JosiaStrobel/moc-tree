@@ -17,14 +17,18 @@ export class NewNoteModal extends Modal {
 	private synonyms_value = '';
 	private file_name_value = '';
 	private file_name_edited = false;
+	private submitted = false;
 
+	/** `on_done` is called once: with the input on submit, with null when the dialog is closed otherwise. */
 	constructor(
 		app: App,
 		private readonly is_folder: boolean,
 		private readonly ask_file_name: boolean,
-		private readonly on_submit: (input: NewNoteInput) => void,
+		private readonly on_done: (input: NewNoteInput | null) => void,
+		initial_title = '',
 	) {
 		super(app);
+		this.title_value = initial_title;
 	}
 
 	onOpen(): void {
@@ -32,6 +36,7 @@ export class NewNoteModal extends Modal {
 		let file_name_input: HTMLInputElement | undefined;
 
 		new Setting(this.contentEl).setName(t('modal.new_note.note_title')).addText((text) => {
+			text.setValue(this.title_value);
 			text.onChange((value) => {
 				this.title_value = value;
 				if (file_name_input && !this.file_name_edited) {
@@ -50,6 +55,8 @@ export class NewNoteModal extends Modal {
 		if (this.ask_file_name) {
 			new Setting(this.contentEl).setName(t('modal.new_note.file_name')).addText((text) => {
 				file_name_input = text.inputEl;
+				this.file_name_value = sanitize_file_name(this.title_value);
+				text.setValue(this.file_name_value);
 				text.onChange((value) => {
 					this.file_name_value = value;
 					this.file_name_edited = true;
@@ -71,6 +78,7 @@ export class NewNoteModal extends Modal {
 
 	onClose(): void {
 		this.contentEl.empty();
+		if (!this.submitted) this.on_done(null);
 	}
 
 	/** Validate the input and hand it over; keeps the dialog open on invalid input. */
@@ -81,11 +89,6 @@ export class NewNoteModal extends Modal {
 			return;
 		}
 		let file_name: string | null = null;
-		new Setting(this.contentEl)
-			.setName(t('modal.new_note.synonyms'))
-			.setDesc(t('modal.new_note.synonyms_desc'))
-			.addText((text) => text.onChange((value) => (this.synonyms_value = value)));
-
 		if (this.ask_file_name) {
 			file_name = sanitize_file_name(this.file_name_value || title);
 			if (file_name === '') {
@@ -93,8 +96,9 @@ export class NewNoteModal extends Modal {
 				return;
 			}
 		}
+		this.submitted = true;
 		this.close();
-		this.on_submit({ title, synonyms: parse_synonyms(this.synonyms_value, title), file_name });
+		this.on_done({ title, synonyms: parse_synonyms(this.synonyms_value, title), file_name });
 	}
 
 	/** Show a validation message below the inputs. */
