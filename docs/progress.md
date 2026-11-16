@@ -67,6 +67,10 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 - [x] Strukturdatei in Obsidian geprüft (2026-11-11)
 - [x] „Fehlende Titel ergänzen“ (`add-missing-titles`, 2026-11-11): `title_proposal.ts` (Vorschlag aus erster H1 oder Dateiname; mit Tests), `missing_titles.ts`, `missing_titles_modal.ts`; „Titel ändern“ füllt den Vorschlag vor; `edit_file`/`write_title` ohne Einzelhinweis für Sammelaktionen
 - [x] „Fehlende Titel ergänzen“ in Obsidian geprüft (2026-11-11)
+- [x] Angezeigte Ordner (2026-11-16): Einstellung `shownFolders` (Settings-Schema 6), Bereich „Ordner“ vor „Waisen“ mit echter Ordnerstruktur, nur lesend; `folder_tree.ts` (reine Logik, mit Tests), `tree_folders.ts`; Aufklapp-Zustand Schema 3 (`foldersCollapsed`, Ordnerpfade als Schlüssel); Suche, „Alle zuklappen“ und „Im Baum anzeigen“ (auch im Dateimenü) berücksichtigen den Bereich
+- [x] Angezeigte Ordner in Obsidian geprüft (2026-11-16)
+- [x] Einordnen aus „Ordner“ (2026-11-16): Ziehen (`TreeDrag.attach_source`) und „Zusätzlich einordnen in“ → „Hier ablegen“; Auswahl merkt sich für Notizen außerhalb der Struktur den Namen (`PendingPut.name`, mit Test)
+- [x] Einordnen aus „Ordner“ in Obsidian geprüft (2026-11-16)
 
 ## Bekannte Probleme
 
@@ -75,6 +79,8 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 - Hinweis: `npm run dev` kann Zwischenstände bauen, während mehrere Dateien geändert werden; `t()` fällt deshalb auf Englisch bzw. den Schlüssel zurück, statt abzustürzen
 
 ## Notizen zur Sitzung
+
+- 2026-11-11: Zusammenspiel mit `bible-annotating` geklärt. Kopplung nur über Frontmatter-Konventionen, moc-tree bleibt unverändert. bible-annotating schreibt eigene Notizen jetzt zeilenweise (kein `processFrontMatter` mehr außer bei Kapitel-/Buch-Notizen), bevorzugt `title` in der Anzeige und legt Themen-Notizen mit `title`/`aliases` an. Empfehlung: `Bibel/` nicht freigeben, `Bibelstudium/Themen` kann freigegeben werden.
 
 - 2026-11-11: Papierkorb, „Hier ablegen“ und Strukturdatei für KI-Werkzeuge umgesetzt, getestet und committet.
 - 2026-11-11: Erster Commit `f698474` (lokal, kein Remote).

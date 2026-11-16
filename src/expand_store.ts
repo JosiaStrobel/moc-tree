@@ -15,6 +15,7 @@ export class ExpandStore {
 	private readonly expanded = new Set<string>();
 	orphans_collapsed = false;
 	trash_collapsed = true;
+	folders_collapsed = false;
 
 	constructor(private readonly app: App) {}
 
@@ -49,6 +50,12 @@ export class ExpandStore {
 		this.save();
 	}
 
+	/** Collapse or open the folders section and save. */
+	set_folders_collapsed(collapsed: boolean): void {
+		this.folders_collapsed = collapsed;
+		this.save();
+	}
+
 	/** Follow a renamed file in all positions. */
 	rename(old_path: string, new_path: string): void {
 		const keys = rename_in_keys(this.expanded, old_path, new_path);
@@ -64,6 +71,7 @@ export class ExpandStore {
 		for (const key of state.expanded) this.expanded.add(key);
 		this.orphans_collapsed = state.orphansCollapsed;
 		this.trash_collapsed = state.trashCollapsed;
+		this.folders_collapsed = state.foldersCollapsed;
 	}
 
 	/** Save the state on this device, dropping positions of deleted notes. */
@@ -74,6 +82,7 @@ export class ExpandStore {
 			expanded: prune_keys(this.expanded, exists),
 			orphansCollapsed: this.orphans_collapsed,
 			trashCollapsed: this.trash_collapsed,
+			foldersCollapsed: this.folders_collapsed,
 		};
 		this.app.saveLocalStorage(EXPAND_STATE_KEY, state);
 	}

@@ -16,6 +16,14 @@ import { show_entry_menu } from './tree_menu';
 import { render_pending_bar } from './tree_pending_bar';
 import { create_row, MAX_INDENT_DEPTH } from './tree_row';
 import { render_orphans, render_trash, type SectionHost } from './tree_sections';
+import {
+	all_folder_keys,
+	collect_folder_trees,
+	expand_to_folder_note,
+	FOLDERS_SECTION,
+	render_folders,
+	visible_folder_trees,
+} from './tree_folders';
 import { render_toolbar } from './tree_toolbar';
 import { show_trash_menu } from './trash_actions';
 
@@ -25,7 +33,7 @@ export const STRUCTURE_VIEW_TYPE = 'moc-tree-structure';
 const MAX_SEARCH_HITS = 500;
 
 /**
- * Sidebar with search, the MOC tree, the orphan list and the trash.
+ * Sidebar with search, the MOC tree, shown real folders, the orphan list and the trash.
  * Row listeners are attached to row elements directly; they are dropped with the rows on re-render.
  */
 export class StructureView extends ItemView {
@@ -105,10 +113,8 @@ export class StructureView extends ItemView {
 	/** Collapse every folder in the tree. */
 	private collapse_all(): void {
 		const index = this.store.get_index();
-		this.expand.set(
-			index.roots.flatMap((root) => subtree_keys(index, [], root)),
-			false,
-		);
+		const folder_keys = all_folder_keys(collect_folder_trees(this.app, this.get_settings().shownFolders));
+		this.expand.set([...index.roots.flatMap((root) => subtree_keys(index, [], root)), ...folder_keys], false);
 		this.render();
 	}
 
@@ -122,8 +128,11 @@ export class StructureView extends ItemView {
 			const section = index.orphans.includes(path) ? 'moc-tree-orphans' : index.in_trash.has(path) ? 'moc-tree-trash' : null;
 			if (section === 'moc-tree-orphans') this.expand.set_orphans_collapsed(false);
 			if (section === 'moc-tree-trash') this.expand.set_trash_collapsed(false);
+			const trees = collect_folder_trees(this.app, this.get_settings().shownFolders);
+			const in_folders = section === null && expand_to_folder_note(this.expand, trees, path);
 			this.render();
-			if (section === null) new Notice(t('notice.reveal_missing'));
+			if (in_folders && this.tree_el) flash_row(find_row(this.tree_el, path, FOLDERS_SECTION));
+			else if (section === null) new Notice(t('notice.reveal_missing'));
 			else if (this.tree_el) flash_row(find_row(this.tree_el, position_key([], path), section));
 			return;
 		}
@@ -150,16 +159,18 @@ export class StructureView extends ItemView {
 		if (!tree_el) return;
 		const index = this.store.get_index();
 		tree_el.empty();
-		this.clipboard.revalidate(index);
+		this.clipboard.revalidate(index, (path) => this.app.vault.getFileByPath(path) !== null);
 		if (this.pending_el) render_pending_bar(this.pending_el, index, this.clipboard);
 		for (const size of TREE_SIZES) this.contentEl.toggleClass(`mod-size-${size}`, size === this.get_settings().treeSize);
 
-		if (index.roots.length === 0 && index.orphans.length === 0 && index.trash.length === 0) {
+		const all_folders = collect_folder_trees(this.app, this.get_settings().shownFolders);
+		if (index.roots.length === 0 && index.orphans.length === 0 && index.trash.length === 0 && all_folders.length === 0) {
 			tree_el.createDiv({ cls: 'pane-empty', text: t('view.empty') });
 			return;
 		}
 		const filter = build_search_filter(index, this.query, MAX_SEARCH_HITS);
-		if (filter && filter.matches.size === 0) {
+		const folders = visible_folder_trees(all_folders, this.query);
+		if (filter && filter.matches.size === 0 && folders.length === 0) {
 			tree_el.createDiv({ cls: 'pane-empty', text: t('view.no_results') });
 			return;
 		}
@@ -167,6 +178,7 @@ export class StructureView extends ItemView {
 			this.render_entry(tree_el, index, describe_note(index, root), [], filter)?.addClass('moc-tree-root');
 		}
 		const host = this.section_host(index);
+		render_folders(tree_el, host, folders, filter !== null);
 		render_orphans(tree_el, host, filter);
 		// Search skips trashed notes, so the trash is only shown without a query.
 		if (!filter && index.trash.length > 0) render_trash(tree_el, host);

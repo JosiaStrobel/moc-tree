@@ -5,6 +5,9 @@ import type MainPlugin from './main';
 import { clean_folder_path } from './scope';
 import { clean_tag, DEFAULT_SETTINGS, is_valid_property_key, is_valid_tag, parse_settings } from './settings';
 
+/** Settings holding a list of folders. */
+type FolderListKey = 'watchedFolders' | 'shownFolders';
+
 /** Settings tab of the plugin, built with the declarative settings API. */
 export class SettingsTab extends PluginSettingTab {
 	constructor(
@@ -52,14 +55,21 @@ export class SettingsTab extends PluginSettingTab {
 				heading: t('settings.watched_folders.heading'),
 				emptyState: t('settings.watched_folders.empty'),
 				items: settings.watchedFolders.map((folder) => ({ name: folder })),
-				onDelete: (index) => void this.update_watched_folders((folders) => folders.splice(index, 1)),
+				onDelete: (index) => void this.update_folders('watchedFolders', (folders) => folders.splice(index, 1)),
 				addItem: {
 					name: t('settings.watched_folders.add'),
-					action: () => {
-						new FolderSuggestModal(this.app, (folder) => {
-							void this.update_watched_folders((folders) => folders.push(folder.path));
-						}).open();
-					},
+					action: () => this.pick_folder('watchedFolders'),
+				},
+			},
+			{
+				type: 'list',
+				heading: t('settings.shown_folders.heading'),
+				emptyState: t('settings.shown_folders.empty'),
+				items: settings.shownFolders.map((folder) => ({ name: folder })),
+				onDelete: (index) => void this.update_folders('shownFolders', (folders) => folders.splice(index, 1)),
+				addItem: {
+					name: t('settings.shown_folders.add'),
+					action: () => this.pick_folder('shownFolders'),
 				},
 			},
 			{
@@ -123,14 +133,18 @@ export class SettingsTab extends PluginSettingTab {
 		await this.plugin.save_settings();
 	}
 
-	/** Apply a change to the watched-folder list, save, and rebuild the list. */
-	private async update_watched_folders(change: (folders: string[]) => void): Promise<void> {
-		const folders = [...this.plugin.settings.watchedFolders];
+	/** Let the user pick a vault folder and append it to a folder list. */
+	private pick_folder(key: FolderListKey): void {
+		new FolderSuggestModal(this.app, (folder) => {
+			void this.update_folders(key, (folders) => folders.push(folder.path));
+		}).open();
+	}
+
+	/** Apply a change to a folder list, save, and rebuild the list. */
+	private async update_folders(key: FolderListKey, change: (folders: string[]) => void): Promise<void> {
+		const folders = [...this.plugin.settings[key]];
 		change(folders);
-		this.plugin.settings = parse_settings({
-			...this.plugin.settings,
-			watchedFolders: folders.map(clean_folder_path),
-		});
+		this.plugin.settings = parse_settings({ ...this.plugin.settings, [key]: folders.map(clean_folder_path) });
 		await this.plugin.save_settings();
 		this.update();
 	}

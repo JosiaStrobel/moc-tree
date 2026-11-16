@@ -8,10 +8,11 @@ export function render_pending_bar(bar: HTMLElement, index: StructureIndex, clip
 	bar.empty();
 	const pending = clipboard.pending;
 	const note = pending ? index.notes.get(pending.path) : undefined;
-	if (!pending || !note) return;
+	const name = note ? display_name(note) : pending?.name;
+	if (!pending || name === undefined) return;
 	setIcon(bar.createDiv({ cls: 'moc-tree-row-icon' }), pending.copy ? 'copy-plus' : 'folder-input');
 	const key = pending.copy ? 'view.pending_copy' : 'view.pending_move';
-	bar.createDiv({ cls: 'moc-tree-pending-text', text: t(key, { name: display_name(note) }) });
+	bar.createDiv({ cls: 'moc-tree-pending-text', text: t(key, { name }) });
 	const cancel = bar.createDiv({ cls: 'clickable-icon', attr: { 'aria-label': t('modal.cancel') } });
 	setIcon(cancel, 'x');
 	cancel.addEventListener('click', () => clipboard.set(null));

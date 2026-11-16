@@ -4,15 +4,25 @@ import { parse_expand_state, position_key, prune_keys, rename_in_keys } from './
 describe('parse_expand_state', () => {
 	it('reads valid data and drops bad entries', () => {
 		const state = parse_expand_state({ schemaVersion: 1, expanded: ['a.md', 'a.md', 3, ''], orphansCollapsed: true });
-		expect(state).toEqual({ schemaVersion: 2, expanded: ['a.md'], orphansCollapsed: true, trashCollapsed: true });
+		expect(state).toEqual({
+			schemaVersion: 3,
+			expanded: ['a.md'],
+			orphansCollapsed: true,
+			trashCollapsed: true,
+			foldersCollapsed: false,
+		});
 	});
 
 	it('keeps an opened trash section', () => {
 		expect(parse_expand_state({ schemaVersion: 2, expanded: [], trashCollapsed: false }).trashCollapsed).toBe(false);
 	});
 
+	it('keeps a collapsed folders section', () => {
+		expect(parse_expand_state({ schemaVersion: 3, expanded: [], foldersCollapsed: true }).foldersCollapsed).toBe(true);
+	});
+
 	it('starts empty for missing, broken or unknown versions', () => {
-		const empty = { schemaVersion: 2, expanded: [], orphansCollapsed: false, trashCollapsed: true };
+		const empty = { schemaVersion: 3, expanded: [], orphansCollapsed: false, trashCollapsed: true, foldersCollapsed: false };
 		expect(parse_expand_state(null)).toEqual(empty);
 		expect(parse_expand_state('x')).toEqual(empty);
 		expect(parse_expand_state({ schemaVersion: 99, expanded: ['a.md'] })).toEqual(empty);

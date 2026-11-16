@@ -65,6 +65,13 @@ describe('pending_valid', () => {
 		const trashed = build_structure_index([note('p', ['a']), note('a', undefined, true)]);
 		expect(pending_valid(trashed, { path: 'a', from: 'p', copy: false })).toBe(false);
 	});
+
+	it('accepts notes picked outside the structure while they exist', () => {
+		const outside = { path: 'Bibel/x.md', from: null, copy: true, name: 'X' };
+		expect(pending_valid(index, outside, (path) => path === 'Bibel/x.md')).toBe(true);
+		expect(pending_valid(index, outside, () => false)).toBe(false);
+		expect(pending_valid(index, { ...outside, name: undefined }, () => true)).toBe(false);
+	});
 });
 
 describe('TreeClipboard', () => {

@@ -1,7 +1,7 @@
 import { clean_folder_path } from './scope';
 
 /** Current version of the stored settings format. */
-export const SETTINGS_SCHEMA_VERSION = 5;
+export const SETTINGS_SCHEMA_VERSION = 6;
 
 /** How new notes get their file name. */
 export const FILE_NAMING_MODES = ['timestamp', 'ask'] as const;
@@ -18,6 +18,8 @@ export interface PluginSettings {
 	newNoteFolder: string;
 	/** Additional managed folders (recursive). */
 	watchedFolders: string[];
+	/** Real folders shown read-only in the "Folders" section (recursive). */
+	shownFolders: string[];
 	/** File name scheme for new notes. */
 	fileNaming: FileNamingMode;
 	/** Frontmatter property holding the structure links. */
@@ -35,6 +37,7 @@ export const DEFAULT_SETTINGS: Readonly<PluginSettings> = {
 	schemaVersion: SETTINGS_SCHEMA_VERSION,
 	newNoteFolder: 'Zettel',
 	watchedFolders: [],
+	shownFolders: [],
 	fileNaming: 'timestamp',
 	structureKey: 'children',
 	treeSize: 'normal',
@@ -74,14 +77,15 @@ function parse_folder_list(raw: unknown): string[] {
 
 /** Validate raw stored data, migrate old schema versions and fill in defaults. */
 export function parse_settings(raw: unknown): PluginSettings {
-	const settings: PluginSettings = { ...DEFAULT_SETTINGS, watchedFolders: [] };
+	const settings: PluginSettings = { ...DEFAULT_SETTINGS, watchedFolders: [], shownFolders: [] };
 	if (!is_record(raw)) return settings;
-	// Schema 1 only had the template's example setting; schemas 2 to 4 lacked treeSize, trashTag or structureFile
+	// Schema 1 only had the template's example setting; schemas 2 to 5 lacked treeSize, trashTag, structureFile or shownFolders
 	// (defaults apply).
 	if (typeof raw.newNoteFolder === 'string') {
 		settings.newNoteFolder = clean_folder_path(raw.newNoteFolder);
 	}
 	settings.watchedFolders = parse_folder_list(raw.watchedFolders);
+	settings.shownFolders = parse_folder_list(raw.shownFolders);
 	if (FILE_NAMING_MODES.includes(raw.fileNaming as FileNamingMode)) {
 		settings.fileNaming = raw.fileNaming as FileNamingMode;
 	}

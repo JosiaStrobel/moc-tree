@@ -9,7 +9,7 @@ export interface NoteMatch {
 }
 
 /** Lower case without accents, for tolerant matching. */
-function fold(text: string): string {
+export function fold(text: string): string {
 	return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 }
 

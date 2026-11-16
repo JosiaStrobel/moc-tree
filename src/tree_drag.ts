@@ -65,6 +65,15 @@ export class TreeDrag {
 	attach_row(row: HTMLElement, entry: TreeEntry, parent: string | null): void {
 		const path = entry.path;
 		if (path === null) return;
+		this.attach_source(row, path, parent);
+		this.attach_target(row, (event) => this.row_request(event, row, entry, parent));
+	}
+
+	/**
+	 * Make a row draggable only, e.g. a note of the folders section: dropping it on a folder files
+	 * it there (`parent` null, so nothing is removed elsewhere).
+	 */
+	attach_source(row: HTMLElement, path: string, parent: string | null): void {
 		row.draggable = true;
 		row.addEventListener('pointerdown', (event) => {
 			this.copy_at_start = event.ctrlKey || event.metaKey;
@@ -83,7 +92,6 @@ export class TreeDrag {
 			this.last_move = null;
 			this.copy_at_start = false;
 		});
-		this.attach_target(row, (event) => this.row_request(event, row, entry, parent));
 	}
 
 	/** Make an element (e.g. the orphan header) a target that removes the entry from its folder. */

@@ -8,6 +8,8 @@ export interface PendingPut {
 	from: string | null;
 	/** Keep the entry in `from` as well. */
 	copy: boolean;
+	/** Display name of a note picked outside the structure (folders section); unset otherwise. */
+	name?: string;
 }
 
 /**
@@ -24,9 +26,17 @@ export function put_request(index: StructureIndex, pending: PendingPut, to: stri
 	return { path: pending.path, from: pending.from, to, anchor: null, copy: pending.copy };
 }
 
-/** True while the pending entry still exists, is not trashed and sits where it was picked. */
-export function pending_valid(index: StructureIndex, pending: PendingPut): boolean {
-	if (!index.notes.has(pending.path) || index.in_trash.has(pending.path)) return false;
+/**
+ * True while the pending entry still exists, is not trashed and sits where it was picked.
+ * Notes picked outside the structure only need to exist (`exists`).
+ */
+export function pending_valid(
+	index: StructureIndex,
+	pending: PendingPut,
+	exists: (path: string) => boolean = () => false,
+): boolean {
+	const known = index.notes.has(pending.path) || (pending.name !== undefined && exists(pending.path));
+	if (!known || index.in_trash.has(pending.path)) return false;
 	if (pending.from === null) return true;
 	return (index.children.get(pending.from) ?? []).some((child) => child.path === pending.path);
 }
@@ -48,7 +58,7 @@ export class TreeClipboard {
 	}
 
 	/** Silently drop the entry if it vanished or moved meanwhile (sync, delete). */
-	revalidate(index: StructureIndex): void {
-		if (this.current && !pending_valid(index, this.current)) this.current = null;
+	revalidate(index: StructureIndex, exists?: (path: string) => boolean): void {
+		if (this.current && !pending_valid(index, this.current, exists)) this.current = null;
 	}
 }

@@ -30,9 +30,16 @@ describe('parse_settings', () => {
 		expect(settings.watchedFolders).toEqual([]);
 	});
 
-	it('does not share the default folder list', () => {
-		parse_settings(null).watchedFolders.push('X');
+	it('does not share the default folder lists', () => {
+		const settings = parse_settings(null);
+		settings.watchedFolders.push('X');
+		settings.shownFolders.push('Y');
 		expect(DEFAULT_SETTINGS.watchedFolders).toEqual([]);
+		expect(DEFAULT_SETTINGS.shownFolders).toEqual([]);
+	});
+
+	it('cleans the shown folders', () => {
+		expect(parse_settings({ shownFolders: ['/Bibel/', 'Bibel', 7] }).shownFolders).toEqual(['Bibel']);
 	});
 });
 
@@ -49,7 +56,7 @@ describe('is_valid_property_key', () => {
 		expect(parse_settings({ treeSize: 'large' }).treeSize).toBe('large');
 		expect(parse_settings({ treeSize: 'huge' }).treeSize).toBe('normal');
 		const old = parse_settings({ schemaVersion: 2, newNoteFolder: 'Z', structureKey: 'kids' });
-		expect(old).toMatchObject({ schemaVersion: 5, newNoteFolder: 'Z', structureKey: 'kids', treeSize: 'normal' });
+		expect(old).toMatchObject({ schemaVersion: 6, newNoteFolder: 'Z', structureKey: 'kids', treeSize: 'normal' });
 	});
 });
 
