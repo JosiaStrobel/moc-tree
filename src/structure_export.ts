@@ -1,8 +1,8 @@
 /** Markdown overview of the whole structure for AI tools; pure rendering, no Obsidian access. */
 import { child_entries, describe_note, type StructureIndex, type TreeEntry } from './structure_index';
 
-/** File name of the generated file inside the AI folder (see the `aiFolder` setting). */
-export const STRUCTURE_EXPORT_NAME = 'structure.md';
+/** Path of the generated file inside the shared AI folder (see the `aiFolder` setting); one subfolder per plugin. */
+export const STRUCTURE_EXPORT_NAME = 'moc-tree/structure.md';
 
 /** Settings the explanation needs. */
 export interface ExportContext {

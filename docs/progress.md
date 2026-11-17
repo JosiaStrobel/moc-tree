@@ -78,6 +78,8 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 - [x] Abbrechen des Dialogs geprüft (Esc → `null`, keine Notiz)
 - [x] Ordner für KI-Dateien einstellbar (2026-11-17): Einstellung `aiFolder` (Standard `.ai-context`, Settings-Schema 7), eigene Gruppe „KI-Werkzeuge“; `ai_folder_issue` (leer, sichtbarer Ordner in verwaltetem Ordner) und `is_hidden_path` mit Tests. Alter Pfad `.moc-tree/structure.md` wird nicht mehr geschrieben, bleibt aber liegen
 - [x] Ordner für KI-Dateien in Obsidian geprüft (2026-11-17)
+- [x] Unterordner pro Plugin (2026-11-17): Strukturdatei liegt jetzt in `.ai-context/moc-tree/structure.md`, damit andere eigene Plugins denselben Ordner nutzen können
+- [x] Unterordner in Obsidian geprüft (2026-11-17)
 
 ## Bekannte Probleme
 
