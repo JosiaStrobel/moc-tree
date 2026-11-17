@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS, is_valid_property_key, parse_settings } from './settings';
+import { ai_folder_issue, DEFAULT_SETTINGS, is_valid_property_key, parse_settings, SETTINGS_SCHEMA_VERSION } from './settings';
 
 describe('parse_settings', () => {
 	it('returns defaults for missing data', () => {
@@ -56,7 +56,7 @@ describe('is_valid_property_key', () => {
 		expect(parse_settings({ treeSize: 'large' }).treeSize).toBe('large');
 		expect(parse_settings({ treeSize: 'huge' }).treeSize).toBe('normal');
 		const old = parse_settings({ schemaVersion: 2, newNoteFolder: 'Z', structureKey: 'kids' });
-		expect(old).toMatchObject({ schemaVersion: 6, newNoteFolder: 'Z', structureKey: 'kids', treeSize: 'normal' });
+		expect(old).toMatchObject({ schemaVersion: SETTINGS_SCHEMA_VERSION, newNoteFolder: 'Z', structureKey: 'kids', treeSize: 'normal' });
 	});
 });
 
@@ -74,5 +74,22 @@ describe('structure file', () => {
 		expect(parse_settings({ schemaVersion: 4 }).structureFile).toBe(false);
 		expect(parse_settings({ structureFile: true }).structureFile).toBe(true);
 		expect(parse_settings({ structureFile: 'yes' }).structureFile).toBe(false);
+	});
+});
+
+describe('ai folder', () => {
+	it('defaults to .ai-context, migrates schema 6 and cleans paths', () => {
+		expect(parse_settings({ schemaVersion: 6 }).aiFolder).toBe('.ai-context');
+		expect(parse_settings({ aiFolder: ' /Meta/.ki/ ' }).aiFolder).toBe('Meta/.ki');
+		expect(parse_settings({ aiFolder: ' / ' }).aiFolder).toBe('.ai-context');
+		expect(parse_settings({ aiFolder: 3 }).aiFolder).toBe('.ai-context');
+	});
+
+	it('rejects empty folders and visible folders inside managed ones', () => {
+		expect(ai_folder_issue('', ['Zettel'])).toBe('empty');
+		expect(ai_folder_issue('Zettel/KI', ['Zettel'])).toBe('managed');
+		expect(ai_folder_issue('KI', [''])).toBe('managed');
+		expect(ai_folder_issue('Zettel/.ki', ['Zettel'])).toBeNull();
+		expect(ai_folder_issue('KI', ['Zettel'])).toBeNull();
 	});
 });

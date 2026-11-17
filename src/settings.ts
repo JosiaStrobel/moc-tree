@@ -1,7 +1,7 @@
-import { clean_folder_path } from './scope';
+import { clean_folder_path, is_hidden_path, is_in_folders } from './scope';
 
 /** Current version of the stored settings format. */
-export const SETTINGS_SCHEMA_VERSION = 6;
+export const SETTINGS_SCHEMA_VERSION = 7;
 
 /** How new notes get their file name. */
 export const FILE_NAMING_MODES = ['timestamp', 'ask'] as const;
@@ -28,6 +28,8 @@ export interface PluginSettings {
 	treeSize: TreeSize;
 	/** Tag (without `#`) that moves a note to the trash. */
 	trashTag: string;
+	/** Folder for generated helper files for AI tools; never empty. */
+	aiFolder: string;
 	/** Keep a local Markdown overview of the structure for AI tools. */
 	structureFile: boolean;
 }
@@ -42,6 +44,7 @@ export const DEFAULT_SETTINGS: Readonly<PluginSettings> = {
 	structureKey: 'children',
 	treeSize: 'normal',
 	trashTag: 'papierkorb',
+	aiFolder: '.ai-context',
 	structureFile: false,
 };
 
@@ -65,6 +68,17 @@ export function is_valid_tag(tag: string): boolean {
 	return /^[\p{L}\p{N}_/-]+$/u.test(tag) && !/^\d+$/.test(tag);
 }
 
+/** Problem with an AI folder: empty, or a visible folder where its files would become managed notes. */
+export type AiFolderIssue = 'empty' | 'managed';
+
+/** Check an AI folder against the managed folders; null if usable. */
+export function ai_folder_issue(folder: string, managed: readonly string[]): AiFolderIssue | null {
+	const clean = clean_folder_path(folder);
+	if (clean === '') return 'empty';
+	if (!is_hidden_path(clean) && is_in_folders(`${clean}/x.md`, managed)) return 'managed';
+	return null;
+}
+
 /** Clean a folder list: normalize paths, drop empty entries and duplicates. */
 function parse_folder_list(raw: unknown): string[] {
 	if (!Array.isArray(raw)) return [];
@@ -79,8 +93,8 @@ function parse_folder_list(raw: unknown): string[] {
 export function parse_settings(raw: unknown): PluginSettings {
 	const settings: PluginSettings = { ...DEFAULT_SETTINGS, watchedFolders: [], shownFolders: [] };
 	if (!is_record(raw)) return settings;
-	// Schema 1 only had the template's example setting; schemas 2 to 5 lacked treeSize, trashTag, structureFile or shownFolders
-	// (defaults apply).
+	// Schema 1 only had the template's example setting; schemas 2 to 6 lacked treeSize, trashTag, structureFile,
+	// shownFolders or aiFolder (defaults apply; schema 6 wrote to the fixed folder .moc-tree).
 	if (typeof raw.newNoteFolder === 'string') {
 		settings.newNoteFolder = clean_folder_path(raw.newNoteFolder);
 	}
@@ -95,6 +109,9 @@ export function parse_settings(raw: unknown): PluginSettings {
 	if (TREE_SIZES.includes(raw.treeSize as TreeSize)) settings.treeSize = raw.treeSize as TreeSize;
 	if (typeof raw.trashTag === 'string' && is_valid_tag(clean_tag(raw.trashTag))) {
 		settings.trashTag = clean_tag(raw.trashTag);
+	}
+	if (typeof raw.aiFolder === 'string' && clean_folder_path(raw.aiFolder) !== '') {
+		settings.aiFolder = clean_folder_path(raw.aiFolder);
 	}
 	if (typeof raw.structureFile === 'boolean') settings.structureFile = raw.structureFile;
 	return settings;

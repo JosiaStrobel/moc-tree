@@ -2,8 +2,8 @@ import { type App, PluginSettingTab, type SettingDefinitionItem } from 'obsidian
 import { FolderSuggestModal } from './folder_suggest_modal';
 import { t } from './i18n';
 import type MainPlugin from './main';
-import { clean_folder_path } from './scope';
-import { clean_tag, DEFAULT_SETTINGS, is_valid_property_key, is_valid_tag, parse_settings } from './settings';
+import { clean_folder_path, managed_folders } from './scope';
+import { ai_folder_issue, clean_tag, DEFAULT_SETTINGS, is_valid_property_key, is_valid_tag, parse_settings } from './settings';
 
 /** Settings holding a list of folders. */
 type FolderListKey = 'watchedFolders' | 'shownFolders';
@@ -113,6 +113,23 @@ export class SettingsTab extends PluginSettingTab {
 							},
 						},
 					},
+				],
+			},
+			{
+				type: 'group',
+				heading: t('settings.group.ai'),
+				items: [
+					{
+						name: t('settings.ai_folder.name'),
+						desc: t('settings.ai_folder.desc'),
+						control: {
+							type: 'text',
+							key: 'aiFolder',
+							defaultValue: DEFAULT_SETTINGS.aiFolder,
+							placeholder: DEFAULT_SETTINGS.aiFolder,
+							validate: (value) => this.validate_ai_folder(value),
+						},
+					},
 					{
 						name: t('settings.structure_file.name'),
 						desc: t('settings.structure_file.desc'),
@@ -131,6 +148,15 @@ export class SettingsTab extends PluginSettingTab {
 	async setControlValue(key: string, value: unknown): Promise<void> {
 		this.plugin.settings = parse_settings({ ...this.plugin.settings, [key]: value });
 		await this.plugin.save_settings();
+	}
+
+	/** Error text for an unusable AI folder, checked against the current managed folders. */
+	private validate_ai_folder(value: string): string | undefined {
+		const { newNoteFolder, watchedFolders } = this.plugin.settings;
+		const issue = ai_folder_issue(value, managed_folders(newNoteFolder, watchedFolders));
+		if (issue === 'empty') return t('settings.ai_folder.invalid_empty');
+		if (issue === 'managed') return t('settings.ai_folder.invalid_managed');
+		return undefined;
 	}
 
 	/** Let the user pick a vault folder and append it to a folder list. */

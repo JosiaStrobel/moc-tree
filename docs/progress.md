@@ -76,6 +76,8 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 - [x] Schnittstelle für andere Plugins (2026-11-16): `src/api.ts` (`MocTreeApi` Version 1, `create_note`), Feld `api` in `main.ts`; `create_note.ts` aufgeteilt in `create_note_file` (ohne Öffnen) und `ask_new_note` (Dialog als Promise, Abbrechen → `null`); Dialog mit vorausgefülltem Titel; `default_file_name` (mit Tests). Nebenbei behoben: Dialog hängte bei jedem Absenden ein weiteres Synonym-Feld an
 - [x] Schnittstelle per Konsole geprüft (2026-11-16): Anlegen ohne Dialog, mit Dialog und Öffnen
 - [x] Abbrechen des Dialogs geprüft (Esc → `null`, keine Notiz)
+- [x] Ordner für KI-Dateien einstellbar (2026-11-17): Einstellung `aiFolder` (Standard `.ai-context`, Settings-Schema 7), eigene Gruppe „KI-Werkzeuge“; `ai_folder_issue` (leer, sichtbarer Ordner in verwaltetem Ordner) und `is_hidden_path` mit Tests. Alter Pfad `.moc-tree/structure.md` wird nicht mehr geschrieben, bleibt aber liegen
+- [x] Ordner für KI-Dateien in Obsidian geprüft (2026-11-17)
 
 ## Bekannte Probleme
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clean_folder_path, is_in_folders, managed_folders } from './scope';
+import { clean_folder_path, is_hidden_path, is_in_folders, managed_folders } from './scope';
 
 describe('clean_folder_path', () => {
 	it('normalizes slashes and whitespace', () => {
@@ -28,5 +28,14 @@ describe('is_in_folders', () => {
 
 	it('treats the vault root as the whole vault', () => {
 		expect(is_in_folders('a.md', [''])).toBe(true);
+	});
+});
+
+describe('is_hidden_path', () => {
+	it('detects dot segments anywhere', () => {
+		expect(is_hidden_path('.ai-context')).toBe(true);
+		expect(is_hidden_path('Meta/.ki/x')).toBe(true);
+		expect(is_hidden_path('Meta/ki')).toBe(false);
+		expect(is_hidden_path('./Meta')).toBe(false);
 	});
 });

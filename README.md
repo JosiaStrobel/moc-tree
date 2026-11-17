@@ -15,7 +15,7 @@ npm version patch   # Version in manifest.json und versions.json erhöhen
 
 ## Strukturdatei für KI-Werkzeuge
 
-Ist die Einstellung „Strukturdatei für KI-Werkzeuge“ an, hält das Plugin `.moc-tree/structure.md` in der Vault-Wurzel aktuell (Erklärung des Formats, Baum, Waisen, Papierkorb, Tabelle Dateiname → Titel). Obsidian Sync überträgt den Ordner nicht; bei Git, Syncthing o. Ä. selbst ausschließen (z. B. `.moc-tree/` in `.gitignore` bzw. `.stignore`).
+Alle Dateien für KI-Werkzeuge liegen im „Ordner für KI-Dateien“ (Einstellung, Standard `.ai-context/` in der Vault-Wurzel). Ist die Einstellung „Strukturdatei“ an, hält das Plugin dort `structure.md` aktuell (Erklärung des Formats, Baum, Waisen, Papierkorb, Tabelle Dateiname → Titel). Obsidian Sync überträgt Punkt-Ordner nicht; bei Git, Syncthing o. Ä. selbst ausschließen (z. B. `.ai-context/` in `.gitignore` bzw. `.stignore`). Ältere Versionen schrieben nach `.moc-tree/structure.md`; dieser Ordner kann gelöscht werden.
 
 Damit eine KI die Datei findet, in die `CLAUDE.md` bzw. `AGENTS.md` des Vaults eintragen:
 
@@ -23,7 +23,7 @@ Damit eine KI die Datei findet, in die `CLAUDE.md` bzw. `AGENTS.md` des Vaults e
 ## Notizstruktur (Plugin MOC Tree)
 
 Die Notizen sind ohne Ordner strukturiert. Dateinamen sind meist Nummern; Titel, Baum und
-Zuordnung Dateiname → Titel stehen in `.moc-tree/structure.md` (versteckter Ordner, wird
+Zuordnung Dateiname → Titel stehen in `.ai-context/structure.md` (versteckter Ordner, wird
 automatisch erzeugt). Diese Datei zuerst lesen und nie bearbeiten; geändert wird die Struktur
 nur über die Eigenschaft `children` der Ordner-Notizen.
 ```

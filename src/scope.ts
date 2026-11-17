@@ -19,3 +19,10 @@ export function managed_folders(new_note_folder: string, watched_folders: readon
 export function is_in_folders(file_path: string, folders: readonly string[]): boolean {
 	return folders.some((folder) => folder === '' || file_path.startsWith(`${folder}/`));
 }
+
+/** True if any segment of the path starts with a dot; Obsidian neither indexes nor syncs such paths. */
+export function is_hidden_path(path: string): boolean {
+	return clean_folder_path(path)
+		.split('/')
+		.some((segment) => segment.startsWith('.'));
+}

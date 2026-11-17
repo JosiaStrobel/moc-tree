@@ -1,7 +1,7 @@
 import { type App, type Component, debounce, normalizePath } from 'obsidian';
 import { managed_folders } from './scope';
 import type { PluginSettings } from './settings';
-import { render_structure_export, STRUCTURE_EXPORT_PATH } from './structure_export';
+import { render_structure_export, STRUCTURE_EXPORT_NAME } from './structure_export';
 import type { StructureStore } from './structure_store';
 
 /** Quiet time after the last structure change before the file is rewritten, in ms. */
@@ -9,8 +9,9 @@ const WRITE_DELAY_MS = 5000;
 
 /** Keeps the local structure file for AI tools up to date while the setting is on. */
 export class StructureExportWriter {
-	/** Content currently on disk as far as known; avoids rewriting unchanged files. */
+	/** Content currently on disk at `last_path` as far as known; avoids rewriting unchanged files. */
 	private last_written: string | null = null;
+	private last_path: string | null = null;
 	private readonly schedule = debounce(() => void this.write_if_enabled(), WRITE_DELAY_MS, true);
 
 	constructor(
@@ -34,8 +35,12 @@ export class StructureExportWriter {
 			structure_key: settings.structureKey,
 			trash_tag: settings.trashTag,
 		});
-		const path = normalizePath(STRUCTURE_EXPORT_PATH);
+		const path = normalizePath(`${settings.aiFolder}/${STRUCTURE_EXPORT_NAME}`);
 		const adapter = this.app.vault.adapter;
+		if (path !== this.last_path) {
+			this.last_path = path;
+			this.last_written = null;
+		}
 		if (this.last_written === null && (await adapter.exists(path))) this.last_written = await adapter.read(path);
 		if (content === this.last_written) return path;
 		const folder = path.slice(0, path.lastIndexOf('/'));
