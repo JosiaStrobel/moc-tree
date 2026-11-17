@@ -17,6 +17,14 @@ npm version patch   # Version in manifest.json und versions.json erhöhen
 
 Alle Dateien für KI-Werkzeuge liegen im „Ordner für KI-Dateien“ (Einstellung, Standard `.ai-context/` in der Vault-Wurzel). Der Ordner wird von mehreren Plugins geteilt, jedes schreibt in einen eigenen Unterordner. Ist die Einstellung „Strukturdatei“ an, hält MOC Tree dort `moc-tree/structure.md` aktuell (Erklärung des Formats, Baum, Waisen, Papierkorb, Tabelle Dateiname → Titel). Obsidian Sync überträgt Punkt-Ordner nicht; bei Git, Syncthing o. Ä. selbst ausschließen (z. B. `.ai-context/` in `.gitignore` bzw. `.stignore`). Ältere Versionen schrieben nach `.moc-tree/structure.md`; dieser Ordner kann gelöscht werden.
 
+Soll eine KI die Datei über das Git-Repo lesen (z. B. Claude mit GitHub-Zugriff), den Ordner nicht ausschließen, sondern mit committen. Alle Geräte erzeugen aus denselben Notizen dieselbe Datei; ein Konflikt entsteht nur, wenn zwei Geräte vor dem Abgleich die Struktur ändern. Für diesen Fall in die `.gitattributes` des Vaults:
+
+```
+.ai-context/** merge=union
+```
+
+Git behält dann beide Fassungen ohne Konfliktmarker, und das Plugin schreibt die Datei kurz darauf wieder korrekt.
+
 Damit eine KI die Datei findet, in die `CLAUDE.md` bzw. `AGENTS.md` des Vaults eintragen:
 
 ```markdown
@@ -26,4 +34,7 @@ Die Notizen sind ohne Ordner strukturiert. Dateinamen sind meist Nummern; Titel,
 Zuordnung Dateiname → Titel stehen in `.ai-context/moc-tree/structure.md` (versteckter Ordner, wird
 automatisch erzeugt). Diese Datei zuerst lesen und nie bearbeiten; geändert wird die Struktur
 nur über die Eigenschaft `children` der Ordner-Notizen.
+Die Datei kann gegenüber den neuesten Commits veraltet sein (sie wird erst beim nächsten
+Sync von einem Gerät mit Obsidian aktualisiert). Für Notizen, die danach geändert wurden,
+`title` und `children` direkt aus dem Frontmatter lesen.
 ```

@@ -1,4 +1,5 @@
 /** Markdown overview of the whole structure for AI tools; pure rendering, no Obsidian access. */
+import { compare_text } from './collate';
 import { child_entries, describe_note, type StructureIndex, type TreeEntry } from './structure_index';
 
 /** Path of the generated file inside the shared AI folder (see the `aiFolder` setting); one subfolder per plugin. */
@@ -109,7 +110,7 @@ function render_notes(index: StructureIndex): string[] {
 		'| File name | Title | Aliases | Folders | Path |',
 		'| --- | --- | --- | --- | --- |',
 	];
-	const notes = [...index.notes.values()].sort((a, b) => a.path.localeCompare(b.path));
+	const notes = [...index.notes.values()].sort((a, b) => compare_text(a.path, b.path));
 	for (const note of notes) {
 		const parents = (index.parents.get(note.path) ?? []).map((p) => index.notes.get(p)?.basename ?? p);
 		const flags = [note.children ? 'folder' : '', note.trashed ? 'trash' : '', note.managed ? '' : 'outside']

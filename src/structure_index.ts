@@ -1,4 +1,5 @@
 /** Structure index: tree, orphans and multiple parents derived from the MOC child lists. */
+import { compare_text } from './collate';
 
 /** One link from a structure list; `path` is null if the link does not resolve. */
 export interface ChildLink {
@@ -76,7 +77,7 @@ function sort_by_name(paths: string[], notes: ReadonlyMap<string, NoteInput>): s
 		const note = notes.get(path);
 		return note ? display_name(note) : path;
 	};
-	return paths.sort((a, b) => name(a).localeCompare(name(b)) || a.localeCompare(b));
+	return paths.sort((a, b) => compare_text(name(a), name(b)) || compare_text(a, b));
 }
 
 /** True if the note carries the trash tag. */

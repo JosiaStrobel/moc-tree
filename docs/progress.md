@@ -80,6 +80,8 @@ _Einzige Stelle für den Umsetzungsstand. Wird nach jeder Arbeitssitzung aktuali
 - [x] Ordner für KI-Dateien in Obsidian geprüft (2026-11-17)
 - [x] Unterordner pro Plugin (2026-11-17): Strukturdatei liegt jetzt in `.ai-context/moc-tree/structure.md`, damit andere eigene Plugins denselben Ordner nutzen können
 - [x] Unterordner in Obsidian geprüft (2026-11-17)
+- [x] Strukturdatei Git-tauglich (2026-11-17): Vergleich mit der Datei auf dem Gerät statt Merker im Speicher (repariert nach Pull), feste Sortiersprache (`collate.ts`, mit Test) im Index und in der Tabelle; README-Abschnitt zu Git und `merge=union`
+- [ ] Im echten Vault prüfen: Datei per Git teilen, nach Pull auf zweitem Gerät keine Änderung an der Datei
 
 ## Bekannte Probleme
 

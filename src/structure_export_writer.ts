@@ -9,9 +9,6 @@ const WRITE_DELAY_MS = 5000;
 
 /** Keeps the local structure file for AI tools up to date while the setting is on. */
 export class StructureExportWriter {
-	/** Content currently on disk at `last_path` as far as known; avoids rewriting unchanged files. */
-	private last_written: string | null = null;
-	private last_path: string | null = null;
 	private readonly schedule = debounce(() => void this.write_if_enabled(), WRITE_DELAY_MS, true);
 
 	constructor(
@@ -37,16 +34,11 @@ export class StructureExportWriter {
 		});
 		const path = normalizePath(`${settings.aiFolder}/${STRUCTURE_EXPORT_NAME}`);
 		const adapter = this.app.vault.adapter;
-		if (path !== this.last_path) {
-			this.last_path = path;
-			this.last_written = null;
-		}
-		if (this.last_written === null && (await adapter.exists(path))) this.last_written = await adapter.read(path);
-		if (content === this.last_written) return path;
+		// Compare with the file on disk, not a cached copy: sync tools (e.g. a git pull) may have replaced it
+		if ((await adapter.exists(path)) && (await adapter.read(path)) === content) return path;
 		const folder = path.slice(0, path.lastIndexOf('/'));
 		if (folder !== '' && !(await adapter.exists(folder))) await adapter.mkdir(folder);
 		await adapter.write(path, content);
-		this.last_written = content;
 		return path;
 	}
 
