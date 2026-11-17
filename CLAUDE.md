@@ -57,8 +57,8 @@ Erstellt aus dem eigenen Obsidian-Plugin-Preset (basiert auf dem Obsidian Sample
 ## Arbeitsweise
 
 - **Zu Beginn jeder Sitzung `docs/progress.md` lesen**, um den aktuellen Stand zu kennen.
-- **Am Ende jeder Sitzung `docs/progress.md` aktualisieren** (Erledigtes abhaken, bekannte Probleme, Notizen zur Sitzung, nächster Schritt).
-- **Nichts doppelt pflegen:** Umsetzungsstand nur in `docs/progress.md`, Konzept und Entscheidungen nur in `docs/concept.md`, Arbeitsregeln nur hier.
+- **Am Ende jeder Sitzung `docs/progress.md` aktualisieren und kurz halten** (Überblick abhaken, nächste Schritte, offene Punkte, bekannte Probleme, Notizen zur letzten Sitzung). Details erledigter Schritte und ältere Sitzungsnotizen (alle außer den letzten 2–3) wörtlich ans Ende von `docs/history.md` verschieben.
+- **Nichts doppelt pflegen:** aktueller Stand und offene Punkte nur in `docs/progress.md`, Verlauf nur in `docs/history.md` (nur ergänzen, nicht zu Beginn jeder Sitzung lesen, bei Bedarf durchsuchen), Konzept und Entscheidungen nur in `docs/concept.md`, Arbeitsregeln nur hier.
 - In kleinen Schritten arbeiten; nach jedem Schritt muss das Plugin bauen (`npm run build`), Linting und Tests bestehen (`npm run lint`, `npm test`) und in Obsidian laufen.
 - Neue Konzeptentscheidungen in `docs/concept.md` nachtragen.
 
