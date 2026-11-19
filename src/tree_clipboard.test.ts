@@ -5,7 +5,7 @@ import { pending_valid, put_request, TreeClipboard } from './tree_clipboard';
 /** Managed note input; `kids` makes it a MOC. */
 function note(path: string, kids?: string[], trashed = false): NoteInput {
 	const children = kids?.map((kid) => ({ link: kid, path: kid })) ?? null;
-	return { path, basename: path, title: path, aliases: [], managed: true, children, trashed };
+	return { path, basename: path, title: path, aliases: [], managed: true, children, trashed, has_body: false };
 }
 
 // p ─┬─ a

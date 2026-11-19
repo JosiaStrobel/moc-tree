@@ -25,7 +25,7 @@ import { find_row, flash_row, mark_active_rows } from './tree_active';
 import { is_in_folders } from './scope';
 import { show_entry_menu } from './tree_menu';
 import { render_pending_bar } from './tree_pending_bar';
-import { create_row, MAX_INDENT_DEPTH } from './tree_row';
+import { add_note_half, create_row, MAX_INDENT_DEPTH } from './tree_row';
 import { render_orphans, render_trash, type SectionHost } from './tree_sections';
 import {
 	all_folder_keys,
@@ -248,6 +248,9 @@ export class StructureView extends ItemView {
 			is_match: path !== null && (filter?.matches.has(path) ?? false),
 			child_count: children.length,
 		});
+		if (expandable && path !== null && index.notes.get(path)?.has_body) {
+			add_note_half(row, t('view.open_folder_note'), (event) => this.open_entry(entry, event));
+		}
 		if (!in_trash) this.drag?.attach_row(row, entry, parent);
 		const pending = this.clipboard.pending;
 		if (!in_trash && pending?.path === path && pending.from === parent) row.addClass('moc-tree-picked');

@@ -34,7 +34,7 @@ function start_convert_to_note(
 	}).open();
 }
 
-/** Rarely used items: open, reorder, expand/collapse subtree, put here, move, also file in. */
+/** Rarely used items: open, reorder, expand/collapse subtree, move, also file in. */
 function add_more_items(
 	menu: Menu,
 	app: App,
@@ -44,8 +44,6 @@ function add_more_items(
 	file: TFile,
 	parent_path: string | null,
 	toggle_subtree: ((expand: boolean) => void) | null,
-	/** Folder rows also get "Put here" next to "Move". */
-	is_moc: boolean,
 ): void {
 	menu.addItem((item) =>
 		item
@@ -77,7 +75,6 @@ function add_more_items(
 		);
 	}
 	menu.addSeparator();
-	if (is_moc) add_put_item(menu, app, settings.structureKey, index, clipboard, file.path);
 	add_pick_items(menu, clipboard, file.path, parent_path);
 }
 
@@ -102,6 +99,10 @@ export function show_entry_menu(
 	if (!file || entry.kind === 'dead') return;
 	const is_folder = entry.kind === 'moc' || entry.kind === 'cycle';
 	const menu = new Menu();
+	// "Put here" comes first and highlighted, so a picked entry is filed with one tap.
+	if (entry.kind === 'moc' && add_put_item(menu, app, settings.structureKey, index, clipboard, file.path)) {
+		menu.addSeparator();
+	}
 	if (is_folder) {
 		menu.addItem((item) =>
 			item
@@ -133,7 +134,7 @@ export function show_entry_menu(
 	add_trash_item(menu, app, settings, file);
 	menu.addSeparator();
 	if (show_more) {
-		add_more_items(menu, app, settings, index, clipboard, file, parent_path, toggle_subtree, entry.kind === 'moc');
+		add_more_items(menu, app, settings, index, clipboard, file, parent_path, toggle_subtree);
 	} else {
 		menu.addItem((item) =>
 			item

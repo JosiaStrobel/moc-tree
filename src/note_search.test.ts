@@ -4,7 +4,7 @@ import type { NoteInput } from './structure_index';
 
 /** Build a managed note input. */
 function note(path: string, title: string | null, aliases: string[] = [], managed = true, trashed = false): NoteInput {
-	return { path, basename: path.replace(/\.md$/, ''), title, aliases, managed, children: null, trashed };
+	return { path, basename: path.replace(/\.md$/, ''), title, aliases, managed, children: null, trashed, has_body: false };
 }
 
 const NOTES = [

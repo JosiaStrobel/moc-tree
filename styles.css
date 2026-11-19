@@ -375,3 +375,32 @@
 .moc-tree-view .moc-tree-row.is-open:hover .moc-tree-count {
 	visibility: visible;
 }
+
+/* "Put here" in the context menu: accent colored while an entry is picked. */
+.menu-item:has(.moc-tree-menu-accent) {
+	color: var(--text-accent);
+	--icon-color: var(--text-accent);
+}
+
+/* Folder whose note has own text: the right third opens the note. */
+.moc-tree-view .tree-item-self.moc-tree-row.moc-tree-split {
+	position: relative;
+}
+
+.moc-tree-note-half {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: calc(100% / 3);
+	/* Left edge shaped like ">": the folder part points into the note part. */
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--size-4-2) 50%);
+	border-radius: 0 var(--radius-s) var(--radius-s) 0;
+	/* Darkened with black, so it reads as a separate button in light and dark themes alike. */
+	background-color: rgba(0, 0, 0, 0.08);
+	cursor: var(--cursor);
+}
+
+.moc-tree-note-half:hover {
+	background-color: rgba(0, 0, 0, 0.16);
+}

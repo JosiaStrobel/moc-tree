@@ -100,7 +100,7 @@ export function add_put_item(
 	const request = put_request(index, pending, to);
 	menu.addItem((item) =>
 		item
-			.setTitle(t('menu.put_here'))
+			.setTitle(createFragment((title) => title.createSpan({ cls: 'moc-tree-menu-accent', text: t('menu.put_here') })))
 			.setIcon('clipboard-paste')
 			.setDisabled(request === null)
 			.onClick(() => {

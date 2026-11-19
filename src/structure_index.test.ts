@@ -8,7 +8,7 @@ function note(path: string, title: string | null, kids?: string[], managed = tru
 		kids?.map((kid) =>
 			kid.startsWith('!') ? { link: kid.slice(1), path: null } : { link: kid, path: kid },
 		) ?? null;
-	return { path, basename, title, aliases: [], managed, children, trashed };
+	return { path, basename, title, aliases: [], managed, children, trashed, has_body: false };
 }
 
 describe('build_structure_index', () => {

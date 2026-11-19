@@ -47,6 +47,7 @@ const de: Messages = {
 	'notice.reveal_missing': 'Diese Notiz steht nicht in der Struktur.',
 	'view.search_placeholder': 'Titel und Aliasse suchen',
 	'view.no_results': 'Keine passenden Notizen.',
+	'view.open_folder_note': 'Ordner-Notiz öffnen',
 	'menu.open': 'Öffnen',
 	'menu.open_new_tab': 'In neuem Tab öffnen',
 	'menu.more': 'Mehr …',

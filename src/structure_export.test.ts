@@ -10,7 +10,7 @@ function note(path: string, title: string | null, kids?: string[], extra: Partia
 	const children =
 		kids?.map((kid) => (kid.startsWith('!') ? { link: kid.slice(1), path: null } : { link: kid, path: kid })) ??
 		null;
-	return { path, basename, title, aliases: [], managed: true, children, trashed: false, ...extra };
+	return { path, basename, title, aliases: [], managed: true, children, trashed: false, has_body: false, ...extra };
 }
 
 /** Lines of one section, without heading and help text. */

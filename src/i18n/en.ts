@@ -45,6 +45,7 @@ const en = {
 	'notice.reveal_missing': 'This note is not in the structure.',
 	'view.search_placeholder': 'Search titles and aliases',
 	'view.no_results': 'No matching notes.',
+	'view.open_folder_note': 'Open folder note',
 	'menu.open': 'Open',
 	'menu.open_new_tab': 'Open in new tab',
 	'menu.more': 'More…',

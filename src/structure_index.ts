@@ -21,6 +21,8 @@ export interface NoteInput {
 	children: ChildLink[] | null;
 	/** True if the note carries the trash tag. */
 	trashed: boolean;
+	/** True if the note has text besides its frontmatter. */
+	has_body: boolean;
 }
 
 /** Lookup tables built once per metadata change. */

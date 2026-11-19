@@ -25,6 +25,19 @@ export interface RowState {
 	child_count: number;
 }
 
+/**
+ * Split a folder row whose note has own text: the right third opens the note, the rest of the
+ * row keeps toggling the folder.
+ */
+export function add_note_half(row: HTMLElement, label: string, on_open: (event: MouseEvent) => void): void {
+	row.addClass('moc-tree-split');
+	const half = row.createDiv({ cls: 'moc-tree-note-half', attr: { 'aria-label': label } });
+	half.addEventListener('click', (event) => {
+		event.stopPropagation();
+		on_open(event);
+	});
+}
+
 /** Create the row element with icon, name, markers and child count (listeners are added by the caller). */
 export function create_row(item_el: HTMLElement, index: StructureIndex, entry: TreeEntry, state: RowState): HTMLElement {
 	const row = item_el.createDiv({ cls: 'tree-item-self is-clickable moc-tree-row' });

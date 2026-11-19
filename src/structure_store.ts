@@ -28,6 +28,7 @@ function read_note(app: App, file: TFile, managed: boolean, settings: PluginSett
 		managed,
 		children,
 		trashed: cache ? has_trash_tag(getAllTags(cache) ?? [], settings.trashTag) : false,
+		has_body: cache?.sections?.some((section) => section.type !== 'yaml') ?? false,
 	};
 }
 
