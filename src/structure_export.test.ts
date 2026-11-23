@@ -48,7 +48,7 @@ describe('render_structure_export', () => {
 		expect(notes(build_structure_index([]), CTX)).toContain('folder for new notes (`Z`)');
 	});
 
-	it('renders the tree in list order with markers', () => {
+	it('renders only folders in the tree, with markers and note counts', () => {
 		const index = build_structure_index([
 			note('Z/1.md', 'Physik', ['Z/2.md', '!gone', 'Z/3.md']),
 			note('Z/2.md', 'Optik', ['Z/3.md', 'Z/1.md']),
@@ -58,12 +58,10 @@ describe('render_structure_export', () => {
 		const text = structure(index, CTX);
 		// Pure cycle without a real root: one member stands in at the top level.
 		expect(section(text, 'Tree')).toEqual([
-			'- **Optik** — `2`',
-			'  - 3 — `3` [no title, in 2 folders]',
-			'  - **Physik** — `1`',
+			'- **Optik** — `2` (1 note)',
+			'  - **Physik** — `1` (1 note)',
 			'    - Optik — `2` [contains itself, not expanded]',
 			'    - gone — `[[gone]]` [not found]',
-			'    - 3 — `3` [no title, in 2 folders]',
 		]);
 		expect(section(text, 'Orphans')).toEqual(['- Waise — `4`']);
 	});
@@ -77,8 +75,7 @@ describe('render_structure_export', () => {
 		]);
 		expect(section(structure(index, CTX), 'Tree')).toEqual([
 			'- **A** — `a.md`',
-			'  - **Shared** — `s.md` [in 2 folders]',
-			'    - N — `n.md`',
+			'  - **Shared** — `s.md` [in 2 folders] (1 note)',
 			'- **B** — `b.md`',
 			'  - **Shared** — `s.md` [in 2 folders] (entries listed above)',
 		]);
@@ -111,11 +108,8 @@ describe('render_structure_export', () => {
 	});
 
 	it('writes notes in the vault root by file name if that is the inbox', () => {
-		const index = build_structure_index([note('a.md', 'A', ['Z/b.md']), note('Z/b.md', 'B')]);
-		expect(section(structure(index, { ...CTX, inbox: '' }), 'Tree')).toEqual([
-			'- **A** — `a`',
-			'  - B — `Z/b.md`',
-		]);
+		const index = build_structure_index([note('a.md', 'A'), note('Z/b.md', 'B')]);
+		expect(section(structure(index, { ...CTX, inbox: '' }), 'Orphans')).toEqual(['- A — `a`', '- B — `Z/b.md`']);
 	});
 
 	it('is deterministic', () => {

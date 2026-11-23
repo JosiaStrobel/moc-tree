@@ -31,7 +31,7 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 
 ## Offene Punkte und Ideen
 
-- [ ] Schlankere Strukturdatei im echten Vault prüfen: Größe von `structure.md` und `notes.md`, alte Tabelle aus `structure.md` verschwunden; falls `structure.md` noch zu groß ist, Aufteilen pro Wurzelordner erwägen (Konzept 6d)
+- [ ] Strukturdatei im echten Vault prüfen: `structure.md` nur mit Ordnern (erwartet ca. 10 KB), danach im Skill `josias-notes` wieder „klein genug zum ganz Lesen“ eintragen
 - [ ] `structure_view.ts` aufteilen (jetzt 325 Zeilen, Grenze ca. 300)
 - [ ] Neuere Funktionen (Bereich „Ordner“, KI-Ordner, „Hier ablegen“ oben, geteilte Ordnerzeile) in Obsidian und auf dem Tablet prüfen
 - [ ] Alten Pfad `.moc-tree/structure.md` im echten Vault von Hand löschen (wird nicht mehr geschrieben, bleibt aber liegen)
@@ -49,6 +49,6 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 
 ## Notizen zur letzten Sitzung
 
-- 2026-11-23: Strukturdatei verschlankt: Tabelle nach `notes.md` ausgelagert, Notizen im Ablageordner nur mit Dateinamen, Pfad-Spalte nur bei abweichendem Ort, Aliasse ohne Titel-Wiederholung, `[folder]`-Markierung im Baum weg (fett reicht), Such-Hinweis im Kopf. Spalte „Folders“ bewusst behalten (grep). In Obsidian noch zu testen.
+- 2026-11-23: Strukturdatei verschlankt: Tabelle nach `notes.md` ausgelagert, Notizen im Ablageordner nur mit Dateinamen, Pfad-Spalte nur bei abweichendem Ort, Aliasse ohne Titel-Wiederholung, `[folder]`-Markierung im Baum weg (fett reicht), Such-Hinweis im Kopf. Spalte „Folders“ bewusst behalten (grep). Danach war `structure.md` im echten Vault noch 42 KB, deshalb zeigt der Baum jetzt nur Ordner mit Notizzahl (ca. 10 KB). In Obsidian noch zu testen.
 - 2026-11-19: „Hier ablegen“ ganz oben und farbig im Kontextmenü; Ordnerzeilen mit eigenem Text in der Ordner-Notiz zweigeteilt (links aufklappen, rechtes Drittel abgedunkelt mit „>“-Spitze öffnet die Notiz). Committet als `cb4c820`, Test in Obsidian und auf dem Tablet offen.
 - 2026-11-11: Zusammenspiel mit `bible-annotating` geklärt. Kopplung nur über Frontmatter-Konventionen, moc-tree bleibt unverändert. bible-annotating schreibt eigene Notizen jetzt zeilenweise (kein `processFrontMatter` mehr außer bei Kapitel-/Buch-Notizen), bevorzugt `title` in der Anzeige und legt Themen-Notizen mit `title`/`aliases` an. Empfehlung: `Bibel/` nicht freigeben, `Bibelstudium/Themen` kann freigegeben werden.
