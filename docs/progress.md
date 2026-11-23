@@ -21,6 +21,7 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 - [x] Schnittstelle für andere Plugins (`MocTreeApi` Version 1, `create_note`)
 - [x] Tablet-Tests (Stand 2026-11-11)
 - [x] Repo auf GitHub (`origin`)
+- [x] „Hier ablegen“ oben und farbig, geteilte Ordnerzeile (rechtes Drittel öffnet die Notiz)
 
 ## Nächste Schritte
 
@@ -37,7 +38,7 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
   4. Im Kopf der Datei(en) den Hinweis ergänzen, nicht alles zu lesen, sondern nach Titel oder Dateiname zu suchen (grep).
   Bei Formatänderung Konzept 6d und den README-Baustein anpassen; gleiche Notizen müssen auf jedem Gerät weiter dieselben Dateien ergeben.
 - [ ] `structure_view.ts` aufteilen (jetzt 325 Zeilen, Grenze ca. 300)
-- [ ] Neuere Funktionen (Bereich „Ordner“, KI-Ordner) auf dem Tablet prüfen
+- [ ] Neuere Funktionen (Bereich „Ordner“, KI-Ordner, „Hier ablegen“ oben, geteilte Ordnerzeile) in Obsidian und auf dem Tablet prüfen
 - [ ] Alten Pfad `.moc-tree/structure.md` im echten Vault von Hand löschen (wird nicht mehr geschrieben, bleibt aber liegen)
 - Geplante Funktionen für später: `docs/concept.md`, Abschnitt „Später“
 
@@ -53,7 +54,6 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 
 ## Notizen zur letzten Sitzung
 
-- 2026-11-19: „Hier ablegen“ ganz oben und farbig im Kontextmenü; Ordnerzeilen mit eigenem Text in der Ordner-Notiz zweigeteilt (links aufklappen, rechtes Drittel öffnet die Notiz). Noch in Obsidian und auf dem Tablet zu testen.
+- 2026-11-19: „Hier ablegen“ ganz oben und farbig im Kontextmenü; Ordnerzeilen mit eigenem Text in der Ordner-Notiz zweigeteilt (links aufklappen, rechtes Drittel abgedunkelt mit „>“-Spitze öffnet die Notiz). Committet als `cb4c820`, Test in Obsidian und auf dem Tablet offen.
 - 2026-11-11: Zusammenspiel mit `bible-annotating` geklärt. Kopplung nur über Frontmatter-Konventionen, moc-tree bleibt unverändert. bible-annotating schreibt eigene Notizen jetzt zeilenweise (kein `processFrontMatter` mehr außer bei Kapitel-/Buch-Notizen), bevorzugt `title` in der Anzeige und legt Themen-Notizen mit `title`/`aliases` an. Empfehlung: `Bibel/` nicht freigeben, `Bibelstudium/Themen` kann freigegeben werden.
 - 2026-11-11: Papierkorb, „Hier ablegen“ und Strukturdatei für KI-Werkzeuge umgesetzt, getestet und committet.
-- 2026-11-11: Erster Commit `f698474` (lokal, kein Remote).

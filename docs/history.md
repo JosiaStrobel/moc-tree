@@ -85,3 +85,4 @@ _Archiv: abgeschlossene Schritte und ältere Sitzungsnotizen, chronologisch. Wir
 ## Sitzungsnotizen
 
 - 2026-11-10: Konzeptfragen geklärt (freigegebene Ordner statt Tag), `processFrontMatter` verworfen, Einstellungen, Frontmatter-Zeilenmodul und Befehle „Neue Notiz“/„Neue Ordner-Notiz“ umgesetzt und getestet. Zufallssuffix auf zwei Ziffern umgestellt, danach Trennstrich entfernt (`2026111009123048`); ältere Testnotizen mit Strich oder Buchstaben-Suffix bleiben gültig, der Dateiname ist für die Struktur egal. Zyklus-Ersatzwurzel und genauere Waisen-Definition ins Konzept übernommen.
+- 2026-11-11: Erster Commit `f698474` (lokal, kein Remote).
