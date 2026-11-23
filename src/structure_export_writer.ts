@@ -24,22 +24,29 @@ export class StructureExportWriter {
 		this.app.workspace.onLayoutReady(() => this.schedule());
 	}
 
-	/** Write now regardless of the setting (command); returns the vault path. */
+	/** Write now regardless of the setting (command); returns the vault path of the structure file. */
 	async write(): Promise<string> {
 		const settings = this.get_settings();
-		const content = render_structure_export(this.store.get_index(), {
+		const files = render_structure_export(this.store.get_index(), {
 			folders: managed_folders(settings.newNoteFolder, settings.watchedFolders),
+			inbox: settings.newNoteFolder,
 			structure_key: settings.structureKey,
 			trash_tag: settings.trashTag,
 		});
-		const path = normalizePath(`${settings.aiFolder}/${STRUCTURE_EXPORT_NAME}`);
+		for (const [name, content] of files) {
+			await this.write_file(normalizePath(`${settings.aiFolder}/${name}`), content);
+		}
+		return normalizePath(`${settings.aiFolder}/${STRUCTURE_EXPORT_NAME}`);
+	}
+
+	/** Write one file unless it already has this content. */
+	private async write_file(path: string, content: string): Promise<void> {
 		const adapter = this.app.vault.adapter;
 		// Compare with the file on disk, not a cached copy: sync tools (e.g. a git pull) may have replaced it
-		if ((await adapter.exists(path)) && (await adapter.read(path)) === content) return path;
+		if ((await adapter.exists(path)) && (await adapter.read(path)) === content) return;
 		const folder = path.slice(0, path.lastIndexOf('/'));
 		if (folder !== '' && !(await adapter.exists(folder))) await adapter.mkdir(folder);
 		await adapter.write(path, content);
-		return path;
 	}
 
 	/** Scheduled write; only while the setting is on. */

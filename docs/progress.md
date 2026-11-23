@@ -16,7 +16,7 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 - [x] Einordnen: Drag & Drop (Desktop), Menü, „Hier ablegen“ (auch auf dem Tablet)
 - [x] „Struktur prüfen“ (Duplikate, tote Links, Zyklen)
 - [x] Papierkorb
-- [x] Strukturdatei für KI-Werkzeuge (`.ai-context/moc-tree/structure.md`, Git-tauglich)
+- [x] Strukturdatei für KI-Werkzeuge (`.ai-context/moc-tree/structure.md` + `notes.md`, Git-tauglich, verschlankt)
 - [x] Bereich „Ordner“ (echte Ordner nur lesend, alle Dateitypen, Einordnen daraus)
 - [x] Schnittstelle für andere Plugins (`MocTreeApi` Version 1, `create_note`)
 - [x] Tablet-Tests (Stand 2026-11-11)
@@ -31,12 +31,7 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 
 ## Offene Punkte und Ideen
 
-- [ ] **Strukturdatei für KI-Werkzeuge schlanker machen** (Konzept 6d). Im echten Vault hat `structure.md` 143 KB, also grob 40–50k Tokens (Baum ca. 50 KB, Tabelle „Notes“ ca. 92 KB bei 862 Notizen). Ganz lesen ist zu teuer, eine KI kann nur darin suchen. Ideen:
-  1. Redundanz entfernen: Im Baum nur den Dateinamen statt `` `Zettel/<name>.md` `` angeben, wenn die Notiz im Ablageordner liegt (der Pfad ist daraus ableitbar). Das macht etwa die Hälfte der Baum-Bytes aus. In der Tabelle entsprechend die Spalte „Path“ nur bei abweichendem Ort füllen und Aliasse weglassen, die nur den Titel wiederholen.
-  2. Aufteilen: eine kleine `overview.md` mit den oberen 2–3 Ebenen und je eine Datei pro Wurzelordner (z. B. `tree/<titel>.md`), damit eine KI nur den Teilbaum liest, um den es geht.
-  3. Tabelle „Notes“ als reines Nachschlagen (Dateiname → Titel, Aliasse) führen: Die Spalte „Folders“ wiederholt nur, was schon im Baum steht.
-  4. Im Kopf der Datei(en) den Hinweis ergänzen, nicht alles zu lesen, sondern nach Titel oder Dateiname zu suchen (grep).
-  Bei Formatänderung Konzept 6d und den README-Baustein anpassen; gleiche Notizen müssen auf jedem Gerät weiter dieselben Dateien ergeben.
+- [ ] Schlankere Strukturdatei im echten Vault prüfen: Größe von `structure.md` und `notes.md`, alte Tabelle aus `structure.md` verschwunden; falls `structure.md` noch zu groß ist, Aufteilen pro Wurzelordner erwägen (Konzept 6d)
 - [ ] `structure_view.ts` aufteilen (jetzt 325 Zeilen, Grenze ca. 300)
 - [ ] Neuere Funktionen (Bereich „Ordner“, KI-Ordner, „Hier ablegen“ oben, geteilte Ordnerzeile) in Obsidian und auf dem Tablet prüfen
 - [ ] Alten Pfad `.moc-tree/structure.md` im echten Vault von Hand löschen (wird nicht mehr geschrieben, bleibt aber liegen)
@@ -54,6 +49,6 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 
 ## Notizen zur letzten Sitzung
 
+- 2026-11-23: Strukturdatei verschlankt: Tabelle nach `notes.md` ausgelagert, Notizen im Ablageordner nur mit Dateinamen, Pfad-Spalte nur bei abweichendem Ort, Aliasse ohne Titel-Wiederholung, `[folder]`-Markierung im Baum weg (fett reicht), Such-Hinweis im Kopf. Spalte „Folders“ bewusst behalten (grep). In Obsidian noch zu testen.
 - 2026-11-19: „Hier ablegen“ ganz oben und farbig im Kontextmenü; Ordnerzeilen mit eigenem Text in der Ordner-Notiz zweigeteilt (links aufklappen, rechtes Drittel abgedunkelt mit „>“-Spitze öffnet die Notiz). Committet als `cb4c820`, Test in Obsidian und auf dem Tablet offen.
 - 2026-11-11: Zusammenspiel mit `bible-annotating` geklärt. Kopplung nur über Frontmatter-Konventionen, moc-tree bleibt unverändert. bible-annotating schreibt eigene Notizen jetzt zeilenweise (kein `processFrontMatter` mehr außer bei Kapitel-/Buch-Notizen), bevorzugt `title` in der Anzeige und legt Themen-Notizen mit `title`/`aliases` an. Empfehlung: `Bibel/` nicht freigeben, `Bibelstudium/Themen` kann freigegeben werden.
-- 2026-11-11: Papierkorb, „Hier ablegen“ und Strukturdatei für KI-Werkzeuge umgesetzt, getestet und committet.
