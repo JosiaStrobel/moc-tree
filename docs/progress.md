@@ -30,6 +30,12 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 
 ## Offene Punkte und Ideen
 
+- [ ] **Strukturdatei für KI-Werkzeuge schlanker machen** (Konzept 6d). Im echten Vault hat `structure.md` 143 KB, also grob 40–50k Tokens (Baum ca. 50 KB, Tabelle „Notes“ ca. 92 KB bei 862 Notizen). Ganz lesen ist zu teuer, eine KI kann nur darin suchen. Ideen:
+  1. Redundanz entfernen: Im Baum nur den Dateinamen statt `` `Zettel/<name>.md` `` angeben, wenn die Notiz im Ablageordner liegt (der Pfad ist daraus ableitbar). Das macht etwa die Hälfte der Baum-Bytes aus. In der Tabelle entsprechend die Spalte „Path“ nur bei abweichendem Ort füllen und Aliasse weglassen, die nur den Titel wiederholen.
+  2. Aufteilen: eine kleine `overview.md` mit den oberen 2–3 Ebenen und je eine Datei pro Wurzelordner (z. B. `tree/<titel>.md`), damit eine KI nur den Teilbaum liest, um den es geht.
+  3. Tabelle „Notes“ als reines Nachschlagen (Dateiname → Titel, Aliasse) führen: Die Spalte „Folders“ wiederholt nur, was schon im Baum steht.
+  4. Im Kopf der Datei(en) den Hinweis ergänzen, nicht alles zu lesen, sondern nach Titel oder Dateiname zu suchen (grep).
+  Bei Formatänderung Konzept 6d und den README-Baustein anpassen; gleiche Notizen müssen auf jedem Gerät weiter dieselben Dateien ergeben.
 - [ ] `structure_view.ts` aufteilen (jetzt 325 Zeilen, Grenze ca. 300)
 - [ ] Neuere Funktionen (Bereich „Ordner“, KI-Ordner) auf dem Tablet prüfen
 - [ ] Alten Pfad `.moc-tree/structure.md` im echten Vault von Hand löschen (wird nicht mehr geschrieben, bleibt aber liegen)
