@@ -49,6 +49,8 @@ _Aktueller Stand, wird nach jeder Arbeitssitzung aktualisiert. Details erledigte
 
 ## Notizen zur letzten Sitzung
 
+- 2026-11-26: Spalte „Folders“ in `notes.md` wird jetzt sortiert. Vorher folgte sie der Reihenfolge von `getMarkdownFiles()`, die sich zwischen Android und Desktop unterscheidet. Deshalb haben Handy und Tablet die Zeile von `hand_school` abwechselnd umgeschrieben. In Obsidian geprüft.
+
 - 2026-11-23: Strukturdatei verschlankt: Tabelle nach `notes.md` ausgelagert, Notizen im Ablageordner nur mit Dateinamen, Pfad-Spalte nur bei abweichendem Ort, Aliasse ohne Titel-Wiederholung, `[folder]`-Markierung im Baum weg (fett reicht), Such-Hinweis im Kopf. Spalte „Folders“ bewusst behalten (grep). Danach war `structure.md` im echten Vault noch 42 KB, deshalb zeigt der Baum jetzt nur Ordner mit Notizzahl (ca. 10 KB). In Obsidian noch zu testen.
 - 2026-11-19: „Hier ablegen“ ganz oben und farbig im Kontextmenü; Ordnerzeilen mit eigenem Text in der Ordner-Notiz zweigeteilt (links aufklappen, rechtes Drittel abgedunkelt mit „>“-Spitze öffnet die Notiz). Committet als `cb4c820`, Test in Obsidian und auf dem Tablet offen.
 - 2026-11-11: Zusammenspiel mit `bible-annotating` geklärt. Kopplung nur über Frontmatter-Konventionen, moc-tree bleibt unverändert. bible-annotating schreibt eigene Notizen jetzt zeilenweise (kein `processFrontMatter` mehr außer bei Kapitel-/Buch-Notizen), bevorzugt `title` in der Anzeige und legt Themen-Notizen mit `title`/`aliases` an. Empfehlung: `Bibel/` nicht freigeben, `Bibelstudium/Themen` kann freigegeben werden.

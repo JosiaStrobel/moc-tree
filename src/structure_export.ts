@@ -166,7 +166,10 @@ function render_notes(index: StructureIndex, ctx: ExportContext): string {
 	];
 	const notes = [...index.notes.values()].sort((a, b) => compare_text(a.path, b.path));
 	for (const note of notes) {
-		const parents = (index.parents.get(note.path) ?? []).map((p) => index.notes.get(p)?.basename ?? p);
+		// Sorted: the index keeps file listing order, which differs between platforms.
+		const parents = (index.parents.get(note.path) ?? [])
+			.map((p) => index.notes.get(p)?.basename ?? p)
+			.sort(compare_text);
 		const flags = [note.children ? 'folder' : '', note.trashed ? 'trash' : '', note.managed ? '' : 'outside']
 			.filter((flag) => flag !== '')
 			.join(', ');

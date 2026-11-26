@@ -118,4 +118,11 @@ describe('render_structure_export', () => {
 			render_structure_export(build_structure_index(inputs), CTX),
 		);
 	});
+
+	it('does not depend on the order the notes are read in', () => {
+		const inputs = [note('Z/2.md', 'B', ['Z/3.md']), note('Z/1.md', 'A', ['Z/3.md']), note('Z/3.md', 'C')];
+		const text = notes(build_structure_index(inputs), CTX);
+		expect(text).toContain('| 3 | C |  | 1, 2 |  |');
+		expect(notes(build_structure_index([...inputs].reverse()), CTX)).toEqual(text);
+	});
 });
